@@ -1060,6 +1060,8 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         {
             NewCameraP.AbsTileY -= 9;
         }
+#else
+        NewCameraP = CameraFollowingEntity.Low->P;
 #endif
         
         // TODO: Map new entities in and old entities out!!!
@@ -1134,56 +1136,58 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         HighEntityIndex < GameState->HighEntityCount;
         ++HighEntityIndex)
     {
-            high_entity *HighEntity = GameState->HighEntities_ + HighEntityIndex;
-            low_entity *LowEntity = GameState->LowEntities + HighEntity->LowEntityIndex;
+        high_entity *HighEntity = GameState->HighEntities_ + HighEntityIndex;
+        low_entity *LowEntity = GameState->LowEntities + HighEntity->LowEntityIndex;
             
 
-            HighEntity->P += EntityOffsetForFrame;
+        HighEntity->P += EntityOffsetForFrame;
 
 
-            real32 dt = Input->dtForFrame;
-            real32 ddZ = -9.8f;
+        real32 dt = Input->dtForFrame;
+        real32 ddZ = -9.8f;
             
-            HighEntity->Z = (0.5f * ddZ * Square(dt) + HighEntity->dZ * dt) + HighEntity->Z;
-            HighEntity->dZ = ddZ * dt + HighEntity->dZ;
-            if(HighEntity->Z < 0)
-            {
-                HighEntity->Z = 0;
-            }
+        HighEntity->Z = (0.5f * ddZ * Square(dt) + HighEntity->dZ * dt) + HighEntity->Z;
+        HighEntity->dZ = ddZ * dt + HighEntity->dZ;
+        if(HighEntity->Z < 0)
+        {
+            HighEntity->Z = 0;
+        }
 
-            real32 cAlpha = 1.0f - (0.5f * HighEntity->Z);
-            if(cAlpha < 0.0f)
-            {
-                cAlpha = 0.0f;
-            }
+        real32 cAlpha = 1.0f - (0.5f * HighEntity->Z);
+        if(cAlpha < 0.0f)
+        {
+            cAlpha = 0.0f;
+        }
             
-            real32 PlayerR = 1.0f;
-            real32 PlayerG = 1.0f;
-            real32 PlayerB = 0.0f;
-            real32 PlayerGroundPointX = ScreenCenterX + (MetersToPixels * HighEntity->P.X);
-            real32 PlayerGroundPointY = ScreenCenterY - (MetersToPixels * HighEntity->P.Y);
-            real32 Z = -(MetersToPixels * HighEntity->Z);
-            v2 PlayerLeftTop = {PlayerGroundPointX - 0.5f * MetersToPixels * LowEntity->Width,
-                PlayerGroundPointY - MetersToPixels * 0.5f * LowEntity->Height};
-    
-            v2 EntityWidthHeight = {LowEntity->Width, LowEntity->Height};
-            if(LowEntity->Type == EntityType_Hero)
-            {
+        real32 PlayerR = 1.0f;
+        real32 PlayerG = 1.0f;
+        real32 PlayerB = 0.0f;
+        real32 PlayerGroundPointX = ScreenCenterX + (MetersToPixels * HighEntity->P.X);
+        real32 PlayerGroundPointY = ScreenCenterY - (MetersToPixels * HighEntity->P.Y);
+        real32 Z = -(MetersToPixels * HighEntity->Z) ;
+        v2 PlayerLeftTop = {PlayerGroundPointX - 0.5f * MetersToPixels * LowEntity->Width,
+                            PlayerGroundPointY - 0.5f * MetersToPixels * LowEntity->Height};
+        v2 EntityWidthHeight = {LowEntity->Width, LowEntity->Height};
+        
+        if(LowEntity->Type == EntityType_Hero)
+        {
                 
-                hero_bitmaps *HeroBitmaps = &GameState->HeroBitmaps[HighEntity->FacingDirection];
-                DrawBitmap(Buffer, &GameState->Shadow, PlayerGroundPointX, PlayerGroundPointY, HeroBitmaps->AlignX, HeroBitmaps->AlignY, cAlpha);
-                DrawBitmap(Buffer, &HeroBitmaps->Torso, PlayerGroundPointX, PlayerGroundPointY + Z, HeroBitmaps->AlignX, HeroBitmaps->AlignY);
-                DrawBitmap(Buffer, &HeroBitmaps->Cape, PlayerGroundPointX, PlayerGroundPointY + Z, HeroBitmaps->AlignX, HeroBitmaps->AlignY);
-                DrawBitmap(Buffer, &HeroBitmaps->Head, PlayerGroundPointX, PlayerGroundPointY + Z, HeroBitmaps->AlignX, HeroBitmaps->AlignY);
+            hero_bitmaps *HeroBitmaps = &GameState->HeroBitmaps[HighEntity->FacingDirection];
+            DrawBitmap(Buffer, &GameState->Shadow, PlayerGroundPointX, PlayerGroundPointY, HeroBitmaps->AlignX, HeroBitmaps->AlignY, cAlpha);
+            DrawBitmap(Buffer, &HeroBitmaps->Torso, PlayerGroundPointX, PlayerGroundPointY + Z, HeroBitmaps->AlignX, HeroBitmaps->AlignY);
+            DrawBitmap(Buffer, &HeroBitmaps->Cape, PlayerGroundPointX, PlayerGroundPointY + Z, HeroBitmaps->AlignX, HeroBitmaps->AlignY);
+            DrawBitmap(Buffer, &HeroBitmaps->Head, PlayerGroundPointX, PlayerGroundPointY + Z, HeroBitmaps->AlignX, HeroBitmaps->AlignY);
 
-            }
-            else
-            {
+        }
+        else
+        {
 
-                DrawRectangle(Buffer,
-                              PlayerLeftTop,
-                              PlayerLeftTop + MetersToPixels * EntityWidthHeight,
-                              PlayerR, PlayerG, PlayerB);
+
+            DrawRectangle(Buffer,
+                          PlayerLeftTop,
+                          PlayerLeftTop + MetersToPixels * EntityWidthHeight,
+                          PlayerR, PlayerG, PlayerB);
+
             }          
         
     }
