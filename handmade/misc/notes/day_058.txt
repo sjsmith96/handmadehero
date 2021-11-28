@@ -1,0 +1,13 @@
+In the SetCamera function we need to pull all of the Low entitiers that are in the camera bounds into
+being High entitites so that they are drawn and stuff.
+
+We used to do this in Tile space, but now we are doing it by Chunk.
+
+We get the Minimum chunk position inside the Camera bounds, and the maximum with the MapIntoChunkSpace function
+
+Then we loop over all of those Chunks.
+
+Each chunk has blocks.
+
+
+
