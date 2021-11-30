@@ -1,0 +1,18 @@
+When Casey wants to return multiple things from a function he wraps them in a struct called "function_result"
+E.g. "add_low_entity_result".
+
+"Default paramaters" can be used in functions. A function parameter can be asigned to a default value.
+void foo(int x = 3)
+{
+    // body
+}
+
+a value for x can be passed as an argument or not. The default value will be 3.
+
+ClosestHeroD is the maximum radius you will search for a hero in UpdateFamiliar.
+
+Update familiar uses the position vectors of the potential player entity and the familiar to find the closest player.
+
+The dot product of a vector with itself gives you the length of the vector squared.
+Therefore, the dot product of the ( v2 TestEntities position - v2 Familiar's position) gives you the distance between these two squared.
+We don't take the sqrt or anything b/c we only care which one is closer, not the actual distance between them.
