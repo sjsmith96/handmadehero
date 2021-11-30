@@ -1,0 +1,54 @@
+We want to allign the hipoint hearts below the player.
+
+The y component of that is easy. They're just some fixed distance below the player.
+The x component of that is a bit more tricky.
+In the even case there would be a center line with an equal amount of hearts on either side of it.
+
+      0
+      |
+     / \
+
+[] [] | [] []
+      |
+      |  <- Center line
+
+In the odd case the center line would need to bisect the middle heart
+
+
+       0
+       |
+      / \
+
+[] [] [|] [] []
+       |
+       |  <- Center line
+
+
+
+     
+Let 's' be the space between the hearts (from their center points across the x axis)
+Let 'n' be the count (the maximum number of hearts)
+
+We should draw the first heart at (n - 1) * (0.5 * s)
+Then just move by 's' and draw the next heart until we've drawn them all.
+
+Casey represents vectors as unions.
+This is especially nifty for 3 and 4 dimensional vectors that you might want to access different ways.
+
+E.g.
+
+union v4
+{
+    struct
+    {
+        real32 X, Y, Z, W;
+    };
+    struct
+    {
+        real32 R, G, B, A;
+    };
+    real32 E[4];
+};
+
+The anonymous structs allow you to access the vector by either X Y Z or R G B A depending on the situation.
+The E array lets you access it by element.
