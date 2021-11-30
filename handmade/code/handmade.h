@@ -91,6 +91,7 @@ enum entity_type
     EntityType_Wall,
     EntityType_Familiar,
     EntityType_Monster,
+    EntityType_Sword,
     
 };
 
@@ -118,6 +119,9 @@ struct low_entity
     // TODO: Should hitpoints themselves be entities?
     uint32 HitPointMax;
     hit_point HitPoint[16];
+
+    uint32 SwordLowIndex;
+    real32 DistanceRemaining;
 };
 
 struct entity
@@ -162,6 +166,7 @@ struct game_state
     hero_bitmaps HeroBitmaps[4];
 
     loaded_bitmap Tree;
+    loaded_bitmap Sword;
     real32 MetersToPixels;
     
 };
