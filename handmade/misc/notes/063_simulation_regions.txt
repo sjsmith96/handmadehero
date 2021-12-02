@@ -1,0 +1,13 @@
+Two constraints:
+
+Extremely large world
+Extremely large entity counts
+
+The problem with the large world constraint is float precision
+The problem with large entity counts is processing power
+
+
+Low entities will be storage only
+A "simulation region" like the camera, but invisible to
+the player will go around, pull low entities into high,
+simulate them, then make them back into low.
