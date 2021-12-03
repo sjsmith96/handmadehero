@@ -1,0 +1,4 @@
+For hash tables instead of calculating some index and then modding it by the size of the hash table,
+Casey takes the Index and masks off the size of the array - 1.
+
+SimRegion->Hash[(HashValue + Offset) & (ArrayCount(SimRegion->Hash) - 1)];

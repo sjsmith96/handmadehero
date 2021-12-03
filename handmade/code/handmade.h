@@ -70,50 +70,10 @@ struct hero_bitmaps
     
 };
 
-enum entity_type
-{
-    EntityType_Null,
-    
-    EntityType_Hero,
-    EntityType_Wall,
-    EntityType_Familiar,
-    EntityType_Monster,
-    EntityType_Sword,
-    
-};
-
-#define HIT_POINT_SUB_COUNT 4
-struct hit_point
-{
-    // TODO: Bake this down into one variable
-    uint8 Flags;
-    uint8 FilledAmount;
-};
-
 struct low_entity
 {
-    entity_type Type;
-    
     world_position P;
-    v2 dP;
-    real32 Width, Height;
-
-    uint32 FacingDirection;
-    real32 tBob;
-
-    // NOTE: This is for "stairs"
-    bool32 Collides;
-    int32 dAbsTileZ;
-
-    // TODO: Should hitpoints themselves be entities?
-    uint32 HitPointMax;
-    hit_point HitPoint[16];
-
-    uint32 SwordLowIndex;
-    real32 DistanceRemaining;
-
-    // TODO: Generation index so we know how up to date this entity
-    // is.
+    sim_entity Sim;
 };
 
 struct entity_visible_piece
@@ -162,6 +122,22 @@ struct entity_visible_piece_group
     uint32 PieceCount;
     entity_visible_piece Pieces[32];
 };
+
+
+inline low_entity *
+GetLowEntity(game_state *GameState, uint32 LowIndex)
+{
+    low_entity *Result = 0;
+    
+    if((LowIndex > 0) && (LowIndex < GameState->LowEntityCount))
+    {
+        Result = GameState->LowEntities + LowIndex;
+    }
+    
+    return Result;
+    
+}
+
 
 
 #define HANDMADE_H
