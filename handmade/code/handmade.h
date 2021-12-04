@@ -84,6 +84,8 @@ struct hero_bitmaps
 
 struct low_entity
 {
+    // TODO: It's kind of busted that Ps can be invalid and we still
+    // need to set the non_spatial flag.
     world_position P;
     sim_entity Sim;
 };
