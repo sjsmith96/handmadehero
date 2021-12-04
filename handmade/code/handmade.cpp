@@ -938,8 +938,9 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                                 if(Sword && IsSet(Sword, EntityFlag_Nonspatial))
                                 {
                                 
-                                    Sword->DistanceRemaining = 5.0f;
-                                    MakeEntitySpatial(Sword, Entity->P, 5.0f * ConHero->dSword);
+                                    Sword->DistanceLimit = 5.0f;
+                                    MakeEntitySpatial(Sword, Entity->P,
+                                                      5.0f * ConHero->dSword);
                                 }
                             }
                 
@@ -977,9 +978,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                    // for the frame.
                                       
                    v2 OldP = Entity->P;
-                   real32 DistanceTraveled = Length(Entity->P - OldP);
-                   Entity->DistanceRemaining -= DistanceTraveled;
-                   if(Entity->DistanceRemaining < 0.0f)
+                   if(Entity->DistanceLimit == 0.0f)
                    {
                        MakeEntityNonSpatial(Entity);
                    }

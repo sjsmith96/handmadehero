@@ -1,1 +1,24 @@
-s
+"Double Dispatch"
+
+What happens when a sword hits another sword?
+What happens when a sword hits a monster?
+
+When a hero collides w/ a monster you probably don't do anything differently
+than when a monster collides with a hero
+
+In MoveEntity we don't care which Entity was passed in and which one was hit
+
+How many dispatch routines do we have?
+
+types^2/2
+
+With these numbers you would need 200 dispatch routines for 20 types of entities. Way too many.
+
+One solution to the double dispatch problem is to have only a few entity types or only a few response routines.
+For example you could just do nothing when most entity types collide. <- "AAAness"
+
+Another solution is to get the matrix of entity interactions filled without writing new routines each time.
+"Fundamental qualities"
+8 fundamental qualities ~40 routines
+"properties"
+Entities are defined by their fundamental properties rather than their type.
