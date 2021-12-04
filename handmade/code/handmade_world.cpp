@@ -32,8 +32,9 @@ IsValid(world_position P)
 inline bool32
 IsCanonical(world *World, real32 TileRel)
 {
-    bool32 Result = ((TileRel >= -0.5f * World->ChunkSideInMeters) &&
-                     (TileRel <= 0.5f * World->ChunkSideInMeters));
+    real32 Epsilon = 0.001f;
+    bool32 Result = ((TileRel >= -(0.5f * World->ChunkSideInMeters + Epsilon)) &&
+                     (TileRel <= (0.5f * World->ChunkSideInMeters + Epsilon)));
                       
     // TODO: Fix floating point math
     return Result;

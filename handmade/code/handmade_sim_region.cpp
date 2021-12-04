@@ -11,9 +11,10 @@ GetHashFromStorageIndex(sim_region *SimRegion, uint32 StorageIndex)
         Offset < ArrayCount(SimRegion->Hash);
         ++Offset)
     {
+        uint32 HashMask = (ArrayCount(SimRegion->Hash) - 1);
+        uint32 HashIndex = ((HashValue + Offset) & HashMask);
+        sim_entity_hash *Entry = SimRegion->Hash + HashIndex;
         
-        sim_entity_hash *Entry = SimRegion->Hash +
-            ((HashValue + Offset) & (ArrayCount(SimRegion->Hash) - 1));
         if((Entry->Index == 0) || (Entry->Index == StorageIndex))
         {
             Result = Entry;
@@ -84,9 +85,10 @@ AddEntity(game_state *GameState, sim_region *SimRegion, uint32 StorageIndex, low
             // TODO: This should really be a decompression step, not a
             // copy
             *Entity = Source->Sim;
+            LoadEntityReference(GameState, SimRegion, &Entity->Sword);
         }
+        
         Entity->StorageIndex = StorageIndex;
-        LoadEntityReference(GameState, SimRegion, &Entity->Sword);
     }
     else
     {
@@ -133,10 +135,10 @@ BeginSim(memory_arena *SimArena, game_state *GameState, world *World, world_posi
     // TODO: If entities were stored in the World we wouldn't need to
     // pass the GameState.
 
-    //TODO:IMPORTANT: Clear the hash table
     //TODO:IMPORTANT: Notion of active vs inactive entities for apron
     
     sim_region *SimRegion = PushStruct(SimArena, sim_region);
+    ZeroStruct(SimRegion->Hash);
     
     SimRegion->World = World;
     SimRegion->Origin = Origin;
@@ -184,7 +186,7 @@ BeginSim(memory_arena *SimArena, game_state *GameState, world *World, world_posi
             }
         }
     }
-
+    return SimRegion;
 }
 
 internal void
@@ -195,7 +197,7 @@ EndSim(sim_region *Region, game_state *GameState)
     
     sim_entity *Entity = Region->Entities;
     for(uint32 EntityIndex = 0;
-        EntityIndex > Region->EntityCount;
+        EntityIndex < Region->EntityCount;
         ++EntityIndex, ++Entity)
     {
         low_entity *Stored = GameState->LowEntities + Entity->StorageIndex;

@@ -27,6 +27,7 @@ struct hit_point
     uint8 FilledAmount;
 };
 
+// TODO: Rename sim_entity to entity
 struct sim_entity;
 union entity_reference
 {
@@ -90,7 +91,7 @@ struct sim_region
 
     // TODO: Do I really want a hash for this?
     // NOTE: Must be a power of 2
-    sim_entity_hash Hash[4896];
+    sim_entity_hash Hash[4096];
     
 };
 

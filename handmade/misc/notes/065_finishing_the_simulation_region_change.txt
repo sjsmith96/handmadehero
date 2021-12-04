@@ -1,0 +1,7 @@
+We have the permanent block of memory and the transient block of memory.
+
+Permanent is stuff like entities, game state.
+
+The transient block is scratch pad where stuff that is only used for calculations go.
+We're going to divide it up into chunks. When something needs memory to do calculations it's going to grab
+a chunk of it. Use it to do its calculations and then get rid of it all when it's done.
