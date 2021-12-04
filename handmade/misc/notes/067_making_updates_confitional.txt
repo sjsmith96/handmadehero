@@ -1,0 +1,46 @@
+We have the area that the camera can see, which we always want to simulate.
+Surrounding that we have a wider region that is also simulated.
+
+On the edges of that wider sim region there may be entities that want to move outside the region.
+There may be entities that those moving entities would have collided with but those would
+never be seen by the collision detector because they're not being pulled into the sim region.
+
+So we're going to grow the sim_region by whatever the maximum movement speed per frame is and pulling
+those entities in to make sure we don't experience that bug
+
+We want to grow the original sim region by the radius of the biggest entitity + the speed of the fastest entity.
+Max(radius + speed)
+
+Anything inside this "collision region" will not be simulated because then we would just keep growing the
+region forever.
+We're just pulling them in to check for collisions, nothing more.
+
+A rectangle plus a rectangle equals another rectable (Minkowski addition)
+
+-------       
+|     |
+|--a  |
+|     |
+-------
+ +
+-------
+|     |
+|--b  |
+|     |
+-------
+ =
+------------
+|          |
+|          |
+|----a + b |
+|          |
+|          |
+------------
+
+"Callbacks"
+
+"Closures"
+"Lambda"
+
+Suppose we have code S which is our iteration (MoveEntity's collision detection)
+We have Code A and Code B which use code S(hared).

@@ -37,15 +37,17 @@ union entity_reference
 
 enum sim_entity_flags
 {
-    EntityFlag_Collides = (1 << 1),
-    EntityFlag_Nonspatial = (1 << 2),
+    EntityFlag_Collides = (1 << 0),
+    EntityFlag_Nonspatial = (1 << 1),
     
     EntityFlag_Simming = (1 << 30),
 };
 
 struct sim_entity
 {
+    // NOTE: These are only for the sim region
     uint32 StorageIndex;
+    bool32 Updatable;
 
     entity_type Type;
     uint32 Flags;
@@ -93,6 +95,7 @@ struct sim_region
     
     world_position Origin;
     rectangle2 Bounds;
+    rectangle2 UpdatableBounds;
     
     uint32 MaxEntityCount;
     uint32 EntityCount;
