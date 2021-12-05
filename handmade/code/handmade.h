@@ -6,6 +6,62 @@
    $Creator: Casey Muratori $
    $Notice: (C) Copyright 2014 by Molly Rocket, Inc. All Rights Reserved. $
    ======================================================================== */
+
+/*
+  TODO:
+
+  ARCHITECTURE EXPLORATION
+  - Collision detection?
+    - Entry/exit?
+    - What's the plan for robustness / shape definition?
+  - Implement multiple sim regions per frame
+    - Per-entity clocking
+    - Sim region merging? For multiple players?
+  - Z!
+    - Clean up things by using v3
+    - Figure out how you go "up" and "down" and how is this rendered?  
+
+  - Debug code
+    - Logging
+    - Diagramming
+    - (A LITTLE GUI, but only a little!) Switches / sliders / etc.
+   
+  - Audio
+    - Sound effect triggers
+    - Ambient sounds
+    - Music
+  - Asset streaming
+      
+  - Metagame / save game?
+    - How do you enter a "save slot"?
+    - Persistant unlocks/etc.
+    - Do we allow saved games? Probably yes, just only for "pausing",
+    * Continuous save for crash recovery?
+  - Rudimentary world gen (no quality, just "what sorts of things" we do)
+    - Placement of background things
+    - Connectivity?
+    - Non-overlapping?
+      - Map display
+        - Magnets - how they work?
+
+            
+  - AI
+    - Rudimentary monstar behaviour example
+    * Pathfinding
+    - AI "storage"
+
+  * Animation - should probably lead into rendering
+    - Particle Systems
+    - Skeletal animation
+     
+ PRODUCTION
+  - Rendering
+  ->Game
+    - Entity system
+    - World generation
+
+    
+ */
 #include "handmade_platform.h"
 
 #define Minimum(A, B) ((A < B) ? (A) : (B))
