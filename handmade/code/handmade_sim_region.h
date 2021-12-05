@@ -16,6 +16,7 @@ enum entity_type
     EntityType_Familiar,
     EntityType_Monster,
     EntityType_Sword,
+    EntityType_Stairwell,
     
 };
 

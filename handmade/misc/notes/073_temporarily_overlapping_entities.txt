@@ -1,0 +1,14 @@
+You can remove an element from the middle of an array by:
+Assign the element you want to remove to the (--Array count)
+This will mess up the order though
+
+For rectangles to intersect they must have at least one point in common
+If the rectangles are axis aligned (not rotated) and have one point in common in all 3 dimensions
+then they must intersect
+
+If (min of A.X > max of B.X ||
+    min of B.X > max of A.X)
+    
+        then they don't intersect.
+
+Else they do intersect.
