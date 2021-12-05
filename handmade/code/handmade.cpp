@@ -332,8 +332,8 @@ AddWall(game_state *GameState, int32 AbsTileX, int32 AbsTileY, int32 AbsTileZ)
     world_position P = ChunkPositionFromTilePositon(GameState->World, AbsTileX, AbsTileY, AbsTileZ); 
     add_low_entity_result Entity = AddLowEntity(GameState, EntityType_Wall, P);
     
-    Entity.Low->Sim.Height = GameState->World->TileSideInMeters;
-    Entity.Low->Sim.Width = Entity.Low->Sim.Height;
+    Entity.Low->Sim.Dim.Y = GameState->World->TileSideInMeters;
+    Entity.Low->Sim.Dim.X = Entity.Low->Sim.Dim.Y;
     AddFlag(&Entity.Low->Sim, EntityFlag_Collides);
     
     return Entity;
@@ -362,8 +362,8 @@ AddSword(game_state *GameState)
  
     add_low_entity_result Entity = AddLowEntity(GameState, EntityType_Sword, NullPosition());
 
-    Entity.Low->Sim.Height = 0.5f;
-    Entity.Low->Sim.Width = 1.0f;
+    Entity.Low->Sim.Dim.Y = 0.5f;
+    Entity.Low->Sim.Dim.X = 1.0f;
     AddFlag(&Entity.Low->Sim, EntityFlag_Nonspatial);
     
     return Entity;
@@ -376,8 +376,8 @@ AddPlayer(game_state *GameState)
     world_position P = GameState->CameraP;
     add_low_entity_result Entity = AddLowEntity(GameState, EntityType_Hero, P);
     
-    Entity.Low->Sim.Height = 0.5f; // 1.4f;
-    Entity.Low->Sim.Width = 1.0f; //0.75f * Entity->Height;
+    Entity.Low->Sim.Dim.Y = 0.5f; // 1.4f;
+    Entity.Low->Sim.Dim.X = 1.0f; //0.75f * Entity->Height;
     AddFlag(&Entity.Low->Sim, EntityFlag_Collides);
 
     InitHitPoints(Entity.Low, 3);
@@ -401,8 +401,8 @@ AddFamiliar(game_state *GameState, uint32 AbsTileX, uint32 AbsTileY, uint32 AbsT
     world_position P = ChunkPositionFromTilePositon(GameState->World, AbsTileX, AbsTileY, AbsTileZ);
     add_low_entity_result Entity = AddLowEntity(GameState, EntityType_Familiar, P);
 
-    Entity.Low->Sim.Height = 0.5f;
-    Entity.Low->Sim.Width = 1.0f;
+    Entity.Low->Sim.Dim.Y = 0.5f;
+    Entity.Low->Sim.Dim.X = 1.0f;
     AddFlag(&Entity.Low->Sim, EntityFlag_Collides);
     
     return Entity;
@@ -418,8 +418,8 @@ AddMonster(game_state *GameState, uint32 AbsTileX, uint32 AbsTileY, uint32 AbsTi
 
     InitHitPoints(Entity.Low, 3);
 
-    Entity.Low->Sim.Height = 0.5f;
-    Entity.Low->Sim.Width = 1.0f;
+    Entity.Low->Sim.Dim.Y = 0.5f;
+    Entity.Low->Sim.Dim.X = 1.0f;
     AddFlag(&Entity.Low->Sim, EntityFlag_Collides);
     
     return Entity;
@@ -942,7 +942,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     memory_arena SimArena;
     InitializeArena(&SimArena, Memory->TransientStorageSize, Memory->TransientStorage);    
     sim_region *SimRegion = BeginSim(&SimArena, GameState, GameState->World,
-                                     GameState->CameraP, CameraBounds);
+                                     GameState->CameraP, CameraBounds, Input->dtForFrame);
     
 
 

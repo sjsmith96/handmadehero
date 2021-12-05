@@ -544,7 +544,9 @@ IsInRectangle(rectangle3 Rectangle, v3 Test)
     bool32 Result = ((Test.X >= Rectangle.Min.X) &&
                      (Test.X < Rectangle.Max.X) &&
                      (Test.Y >= Rectangle.Min.Y) &&
-                     (Test.Y < Rectangle.Max.Y));
+                     (Test.Y < Rectangle.Max.Y) &&
+                     (Test.Z >= Rectangle.Min.Z) &&
+                     (Test.Z < Rectangle.Max.Z));
 
     return Result;
     

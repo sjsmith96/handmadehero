@@ -12,9 +12,7 @@
 
   ARCHITECTURE EXPLORATION
   - Z!
-    - Clean up things by using v3
     - Figure out how you go "up" and "down" and how is this rendered?
-    - SOLVE THE PUZZLER from world_position?
 
   - Collision detection?
     - Entry/exit?
@@ -48,7 +46,7 @@
 
             
   - AI
-    - Rudimentary monstar behaviour example
+    - Rudimentary monster behaviour example
     * Pathfinding
     - AI "storage"
 
