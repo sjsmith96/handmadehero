@@ -8,13 +8,6 @@
    ======================================================================== */
 
 
-// TODO: Replace this with a 3d vector
-struct world_difference
-{
-    v2 dXY;
-    real32 dZ;
-};
-
 struct world_position
 {
     // TODO: Puzzler! How can we get rid of abstile* here.
@@ -26,7 +19,7 @@ struct world_position
     int32 ChunkZ;
 
     // NOTE: These are the offsets from the chunk center
-    v2 Offset_;
+    v3 Offset_;
     
 };
 
@@ -56,7 +49,8 @@ struct world
 {
 
     real32 TileSideInMeters;
-    real32 ChunkSideInMeters;
+    real32 TileDepthInMeters;
+    v3 ChunkDimInMeters;
 
     // TODO: WorldChunkHash should probably switch to pointers IF
     // tile entity blocks continue to be stored en masse directly in the tile chunk

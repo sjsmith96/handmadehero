@@ -1,0 +1,5 @@
+Hadamard product (vector operation):
+    - Multiply the x of v1 by the x of v2 and stick it in the resulting vectors x
+    - Same thing but for y
+
+Basically the same as dot(inner) product except you don't sum the terms and return them as a real32.

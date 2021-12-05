@@ -1,6 +1,6 @@
 #if !defined(HANDMADE_ENTITY_H)
 
-#define InvalidP V2(100000.0f, 100000.0f)
+#define InvalidP V3(100000.0f, 100000.0f, 100000.0f)
 
 inline bool32
 IsSet(sim_entity *Entity, uint32 Flags)
@@ -31,7 +31,7 @@ MakeEntityNonSpatial(sim_entity *Entity)
 }
 
 inline void
-MakeEntitySpatial(sim_entity *Entity, v2 P, v2 dP)
+MakeEntitySpatial(sim_entity *Entity, v3 P, v3 dP)
 {
     ClearFlag(Entity, EntityFlag_Nonspatial);
     Entity->P = P;
