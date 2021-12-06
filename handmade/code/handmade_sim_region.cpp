@@ -330,13 +330,13 @@ CanCollide(game_state *GameState, sim_entity *A, sim_entity *B)
             // TODO: Propety based logic goes here
             Result = true;
         }
-
                
-        if((A->Type == EntityType_Stairwell ||
-            B->Type == EntityType_Stairwell))
+        if(A->Type == EntityType_Stairwell ||
+           B->Type == EntityType_Stairwell)
         {
-            Result = false;
+            int BreakHere = 5;
         }
+
 
 
         // TODO: BETTER HASH FUNCTION
@@ -408,7 +408,6 @@ CanOverlap(game_state *GameState, sim_entity *Mover, sim_entity *Region)
     return Result;
 }
 
-
 internal void
 HandleOverlap(game_state *GameState, sim_entity *Mover, sim_entity *Region, real32 dt,
               real32 *Ground)
@@ -423,14 +422,41 @@ HandleOverlap(game_state *GameState, sim_entity *Mover, sim_entity *Region, real
                 
 }
 
+
+internal bool32
+SpeculativeCollide(sim_entity *Mover, sim_entity *Region)
+{
+
+    bool32 Result = true;
+    if(Region->Type == EntityType_Stairwell)
+    {
+        rectangle3 RegionRect = RectCenterDim(Region->P, Region->Dim);
+        v3 Bary = Clamp01(GetBarycentric(RegionRect, Mover->P));
+
+
+        real32 Ground = Lerp(RegionRect.Min.Z, Bary.Y, RegionRect.Max.Z);
+        real32 StepHeight = 0.1f;
+        Result = ((AbsoluteValue(Mover->P.Z - Ground) > StepHeight) ||
+                  ((Bary.Y > 0.1f) && (Bary.Y < 0.9f)));
+        
+    }
+
+    return Result;
+}
+
+
 internal void
 MoveEntity(game_state *GameState, sim_region *SimRegion, sim_entity *Entity, real32 dt, move_spec *MoveSpec, v3 ddP)
 {
 
     Assert(!IsSet(Entity, EntityFlag_Nonspatial));
-
     
     world *World = SimRegion->World;
+
+    if(Entity->Type == EntityType_Hero)
+    {
+        int BreakHere = 5;
+    }
     
 
 
@@ -452,7 +478,10 @@ MoveEntity(game_state *GameState, sim_region *SimRegion, sim_entity *Entity, rea
     // a = a <-- d-pad
     // TODO: ODE here!
     ddP += -MoveSpec->Drag * Entity->dP; // decelerate by the velocity he's moving (friction)
-    ddP += V3(0.0f, 0.0f, -9.8f); // NOTE: Gravity
+    if(!IsSet(Entity, EntityFlag_ZSupported))
+    {
+        ddP += V3(0.0f, 0.0f, -9.8f); // NOTE: Gravity
+    }
 
     v3 OldPlayerP = Entity->P;
     v3 PlayerDelta = (0.5f * ddP * Square(dt) + Entity->dP * dt);
@@ -505,8 +534,7 @@ MoveEntity(game_state *GameState, sim_region *SimRegion, sim_entity *Entity, rea
                 {
 
                     sim_entity *TestEntity = SimRegion->Entities + TestHighEntityIndex;
-                    if(CanCollide(GameState, Entity, TestEntity) &&
-                       TestEntity->P.Z == Entity->P.Z)
+                    if(CanCollide(GameState, Entity, TestEntity))
                     {
                         // TODO: Entities have height?
                         v3 MinkowskiDiameter = {TestEntity->Dim.X + Entity->Dim.X,
@@ -520,29 +548,48 @@ MoveEntity(game_state *GameState, sim_region *SimRegion, sim_entity *Entity, rea
 
                         v3 Rel = Entity->P - TestEntity->P;
 
+                        real32 tMinTest = tMin;
+                        v3 TestWallNormal = {};
+                        bool32 HitThis = false;
                         if(TestWall(MinCorner.X, Rel.X, Rel.Y, PlayerDelta.X, PlayerDelta.Y,
-                                    &tMin, MinCorner.Y, MaxCorner.Y))
+                                    &tMinTest, MinCorner.Y, MaxCorner.Y))
                         {
-                            WallNormal = V3(-1, 0, 0);
-                            HitEntity = TestEntity;
+                            TestWallNormal = V3(-1, 0, 0);
+                            HitThis = true;
+
                         }
                         if(TestWall(MaxCorner.X, Rel.X, Rel.Y, PlayerDelta.X, PlayerDelta.Y,
-                                    &tMin, MinCorner.Y, MaxCorner.Y))
+                                    &tMinTest, MinCorner.Y, MaxCorner.Y))
                         {
-                            WallNormal = V3(1, 0, 0);
-                            HitEntity = TestEntity;
+                            TestWallNormal = V3(1, 0, 0);
+                            HitThis = true;
                         }
                         if(TestWall(MinCorner.Y, Rel.Y, Rel.X, PlayerDelta.Y, PlayerDelta.X,
-                                    &tMin, MinCorner.X, MaxCorner.X))
+                                    &tMinTest, MinCorner.X, MaxCorner.X))
                         {
-                            WallNormal = V3(0, -1, 0);
-                            HitEntity = TestEntity;
+                            TestWallNormal = V3(0, -1, 0);
+                            HitThis = true;
                         }
                         if(TestWall(MaxCorner.Y, Rel.Y, Rel.X, PlayerDelta.Y, PlayerDelta.X,
-                                    &tMin, MinCorner.X, MaxCorner.X))
+                                    &tMinTest, MinCorner.X, MaxCorner.X))
                         {
-                            WallNormal = V3(0, 1, 0);
-                            HitEntity = TestEntity;
+                            TestWallNormal = V3(0, 1, 0);
+                            HitThis = true;
+                        }
+
+                        // TODO: We need a concept of stepping onto vs
+                        // stepping off of here so we can prevent you
+                        // from leaving stairs.
+                        if(HitThis)
+                        {
+                            v3 TestP = Entity->P + tMinTest * PlayerDelta;
+                            if(SpeculativeCollide(Entity, TestEntity))
+                            {
+                                
+                                tMin = tMinTest;
+                                WallNormal =  TestWallNormal;
+                                HitEntity = TestEntity;
+                            }
                         }
 
                     }
@@ -610,10 +657,17 @@ MoveEntity(game_state *GameState, sim_region *SimRegion, sim_entity *Entity, rea
     }
 
     // TODO: This has to become real height handling / ground collision
-    if(Entity->P.Z < Ground)
+    if((Entity->P.Z <= Ground) ||
+       (IsSet(Entity, EntityFlag_ZSupported) &&
+        (Entity->dP.Z == 0.0f)))
     {
         Entity->P.Z = Ground;
         Entity->dP.Z = 0;
+        AddFlags(Entity, EntityFlag_ZSupported);
+    }
+    else
+    {
+        ClearFlags(Entity, EntityFlag_ZSupported);
     }
 
 
