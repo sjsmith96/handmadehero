@@ -1,0 +1,6 @@
+Barycentric or "Normalized Relative Coordinates"
+
+(P - min) / (max - min) = P'
+
+LERP **************** (1 - t) * starting + t * ending *************
+Lerp moves you between two values proportional to the t and t is normalized (0 - 1)
