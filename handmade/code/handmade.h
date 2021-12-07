@@ -216,6 +216,7 @@ struct game_state
     sim_entity_collision_volume_group *MonsterCollision;
     sim_entity_collision_volume_group *WallCollision;
     sim_entity_collision_volume_group *FamiliarCollision;
+    sim_entity_collision_volume_group *StandardRoomCollision;
 };
 
 // TODO: This is dumb. This should just be part of
