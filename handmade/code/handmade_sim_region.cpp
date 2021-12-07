@@ -414,14 +414,10 @@ HandleOverlap(game_state *GameState, sim_entity *Mover, sim_entity *Region, real
 {
     if(Region->Type == EntityType_Stairwell)
     {
-        rectangle3 RegionRect = RectCenterDim(Region->P, Region->Dim);
-        v3 Bary = Clamp01(GetBarycentric(RegionRect, Mover->P));
-
-        *Ground = Lerp(RegionRect.Min.Z, Bary.Y, RegionRect.Max.Z);
+        *Ground = GetStairGround(Region, GetEntityGroundPoint(Mover));
     }
                 
 }
-
 
 internal bool32
 SpeculativeCollide(sim_entity *Mover, sim_entity *Region)
@@ -430,15 +426,14 @@ SpeculativeCollide(sim_entity *Mover, sim_entity *Region)
     bool32 Result = true;
     if(Region->Type == EntityType_Stairwell)
     {
-        rectangle3 RegionRect = RectCenterDim(Region->P, Region->Dim);
-        v3 Bary = Clamp01(GetBarycentric(RegionRect, Mover->P));
-
-
-        real32 Ground = Lerp(RegionRect.Min.Z, Bary.Y, RegionRect.Max.Z);
         real32 StepHeight = 0.1f;
-        Result = ((AbsoluteValue(Mover->P.Z - Ground) > StepHeight) ||
+#if 0
+        Result = ((AbsoluteValue(GetEntityGroundPoint(Mover).Z - Ground) > StepHeight) ||
                   ((Bary.Y > 0.1f) && (Bary.Y < 0.9f)));
-        
+#endif
+        v3 MoverGroundPoint = GetEntityGroundPoint(Mover);
+        real32 Ground = GetStairGround(Region, MoverGroundPoint);
+        Result = ((AbsoluteValue(MoverGroundPoint.Z - Ground) > StepHeight));
     }
 
     return Result;
@@ -661,6 +656,7 @@ MoveEntity(game_state *GameState, sim_region *SimRegion, sim_entity *Entity, rea
 
     }
 
+    Ground += Entity->P.Z - GetEntityGroundPoint(Entity).Z;
     // TODO: This has to become real height handling / ground collision
     if((Entity->P.Z <= Ground) ||
        (IsSet(Entity, EntityFlag_ZSupported) &&
