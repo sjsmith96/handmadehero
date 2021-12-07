@@ -543,52 +543,57 @@ MoveEntity(game_state *GameState, sim_region *SimRegion, sim_entity *Entity, rea
                         
                         v3 MinCorner = -0.5f * MinkowskiDiameter;
                         v3 MaxCorner = 0.5f * MinkowskiDiameter;
-
-                        //Test all of the walls and see if any are lower than tMin
-
+                        
                         v3 Rel = Entity->P - TestEntity->P;
+                        //Test all of the walls and see if any are lower than tMin
+                        // TODO: Do we want an open inclusion at the MaxCorner?
+                        if((Rel.Z >= MinCorner.Z) &&
+                           (Rel.Z < MaxCorner.Z))
+                        {
 
-                        real32 tMinTest = tMin;
-                        v3 TestWallNormal = {};
-                        bool32 HitThis = false;
-                        if(TestWall(MinCorner.X, Rel.X, Rel.Y, PlayerDelta.X, PlayerDelta.Y,
-                                    &tMinTest, MinCorner.Y, MaxCorner.Y))
-                        {
-                            TestWallNormal = V3(-1, 0, 0);
-                            HitThis = true;
 
-                        }
-                        if(TestWall(MaxCorner.X, Rel.X, Rel.Y, PlayerDelta.X, PlayerDelta.Y,
-                                    &tMinTest, MinCorner.Y, MaxCorner.Y))
-                        {
-                            TestWallNormal = V3(1, 0, 0);
-                            HitThis = true;
-                        }
-                        if(TestWall(MinCorner.Y, Rel.Y, Rel.X, PlayerDelta.Y, PlayerDelta.X,
-                                    &tMinTest, MinCorner.X, MaxCorner.X))
-                        {
-                            TestWallNormal = V3(0, -1, 0);
-                            HitThis = true;
-                        }
-                        if(TestWall(MaxCorner.Y, Rel.Y, Rel.X, PlayerDelta.Y, PlayerDelta.X,
-                                    &tMinTest, MinCorner.X, MaxCorner.X))
-                        {
-                            TestWallNormal = V3(0, 1, 0);
-                            HitThis = true;
-                        }
-
-                        // TODO: We need a concept of stepping onto vs
-                        // stepping off of here so we can prevent you
-                        // from leaving stairs.
-                        if(HitThis)
-                        {
-                            v3 TestP = Entity->P + tMinTest * PlayerDelta;
-                            if(SpeculativeCollide(Entity, TestEntity))
+                            real32 tMinTest = tMin;
+                            v3 TestWallNormal = {};
+                            bool32 HitThis = false;
+                            if(TestWall(MinCorner.X, Rel.X, Rel.Y, PlayerDelta.X, PlayerDelta.Y,
+                                        &tMinTest, MinCorner.Y, MaxCorner.Y))
                             {
+                                TestWallNormal = V3(-1, 0, 0);
+                                HitThis = true;
+
+                            }
+                            if(TestWall(MaxCorner.X, Rel.X, Rel.Y, PlayerDelta.X, PlayerDelta.Y,
+                                        &tMinTest, MinCorner.Y, MaxCorner.Y))
+                            {
+                                TestWallNormal = V3(1, 0, 0);
+                                HitThis = true;
+                            }
+                            if(TestWall(MinCorner.Y, Rel.Y, Rel.X, PlayerDelta.Y, PlayerDelta.X,
+                                        &tMinTest, MinCorner.X, MaxCorner.X))
+                            {
+                                TestWallNormal = V3(0, -1, 0);
+                                HitThis = true;
+                            }
+                            if(TestWall(MaxCorner.Y, Rel.Y, Rel.X, PlayerDelta.Y, PlayerDelta.X,
+                                        &tMinTest, MinCorner.X, MaxCorner.X))
+                            {
+                                TestWallNormal = V3(0, 1, 0);
+                                HitThis = true;
+                            }
+
+                            // TODO: We need a concept of stepping onto vs
+                            // stepping off of here so we can prevent you
+                            // from leaving stairs.
+                            if(HitThis)
+                            {
+                                v3 TestP = Entity->P + tMinTest * PlayerDelta;
+                                if(SpeculativeCollide(Entity, TestEntity))
+                                {
                                 
-                                tMin = tMinTest;
-                                WallNormal =  TestWallNormal;
-                                HitEntity = TestEntity;
+                                    tMin = tMinTest;
+                                    WallNormal =  TestWallNormal;
+                                    HitEntity = TestEntity;
+                                }
                             }
                         }
 
