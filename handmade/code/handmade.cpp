@@ -680,20 +680,20 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         GameState->NullCollision = MakeNullCollision(GameState);
         GameState->SwordCollision = MakeSimpleGroundedCollision(GameState, 1.0f, 0.5f, 0.1f);
         GameState->StairCollision = MakeSimpleGroundedCollision(GameState,
-                                                               GameState->World->TileSideInMeters,
-                                                               2.0f * GameState->World->TileSideInMeters,
-                                                               1.1f * GameState->World->TileDepthInMeters);
+                                                                GameState->World->TileSideInMeters,
+                                                                2.0f * GameState->World->TileSideInMeters,
+                                                                1.1f * GameState->World->TileDepthInMeters);
         GameState->PlayerCollision = MakeSimpleGroundedCollision(GameState, 1.0f, 0.5f, 1.2f);
         GameState->MonsterCollision = MakeSimpleGroundedCollision(GameState, 1.0f, 0.5f, 0.5f);
         GameState->WallCollision = MakeSimpleGroundedCollision(GameState,
-                                                              GameState->World->TileSideInMeters,
-                                                              GameState->World->TileSideInMeters,
-                                                              GameState->World->TileDepthInMeters);
+                                                               GameState->World->TileSideInMeters,
+                                                               GameState->World->TileSideInMeters,
+                                                               GameState->World->TileDepthInMeters);
         GameState->FamiliarCollision = MakeSimpleGroundedCollision(GameState, 1.0f, 0.5f, 0.5f);
         GameState->StandardRoomCollision = MakeSimpleGroundedCollision(GameState,
-                                                               TilesPerWidth*GameState->World->TileSideInMeters,
-                                                               TilesPerHeight*GameState->World->TileSideInMeters,
-                                                               GameState->World->TileDepthInMeters * 0.9f);
+                                                                       TilesPerWidth*GameState->World->TileSideInMeters,
+                                                                       TilesPerHeight*GameState->World->TileSideInMeters,
+                                                                       GameState->World->TileDepthInMeters * 0.9f);
             
         GameState->Backdrop
             = DEBUGLoadBMP(Thread, Memory->DEBUGPlatformReadEntireFile, "test/test_background.bmp");
@@ -795,9 +795,9 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             }
 
             AddStandardRoom(GameState,
-                     ScreenX*TilesPerWidth + TilesPerWidth/2,
-                     ScreenY*TilesPerHeight + TilesPerHeight/2,
-                     AbsTileZ);
+                            ScreenX*TilesPerWidth + TilesPerWidth/2,
+                            ScreenY*TilesPerHeight + TilesPerHeight/2,
+                            AbsTileZ);
             
             for(uint32 TileY = 0;
                 TileY < TilesPerHeight;
@@ -836,7 +836,10 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
                     if(ShouldBeDoor)
                     {
-                        AddWall(GameState, AbsTileX, AbsTileY, AbsTileZ);
+                        if(ScreenIndex == 0)
+                        {
+                            AddWall(GameState, AbsTileX, AbsTileY, AbsTileZ);
+                        }
                     }
 
                     else if(CreatedZDoor)
