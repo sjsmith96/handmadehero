@@ -176,7 +176,7 @@ MapIntoChunkSpace(world *World, world_position BasePos, v3 Offset)
 }
 
 inline world_position
-ChunkPositionFromTilePositon(world *World, int32 AbsTileX, int32 AbsTileY, int32 AbsTileZ,
+ChunkPositionFromTilePosition(world *World, int32 AbsTileX, int32 AbsTileY, int32 AbsTileZ,
                              v3 AdditionalOffset = V3(0, 0, 0))
 {
     world_position BasePos = {};

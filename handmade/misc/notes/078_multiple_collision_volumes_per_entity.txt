@@ -1,0 +1,3 @@
+Position != collision "mesh"
+
+Collision is an On^2 problem. The only way to deal with it is to keep n low.
