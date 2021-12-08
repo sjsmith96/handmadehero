@@ -152,7 +152,7 @@ typedef struct debug_read_file_result
 
 // FOUR THINGS - timer,  controller/keyboard input, bitmap buffer to use, sound buffer to use
 // TODO : In the future, rendering specifically will become a three-tiered abstraction!!!
-
+#define BITMAP_BYTES_PER_PIXEL 4
     typedef struct game_offscreen_buffer
     {
         // NOTE: Pixels are always 32-bits wide, Memory Order BB GG RR XX
@@ -161,7 +161,6 @@ typedef struct debug_read_file_result
         int Height;
         int Pitch;
     
-        int BytesPerPixel;
     } game_offscreen_buffer;
 
     typedef struct game_sound_output_buffer

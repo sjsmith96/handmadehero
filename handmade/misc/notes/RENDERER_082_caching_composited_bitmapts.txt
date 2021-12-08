@@ -1,0 +1,20 @@
+RENDERER LFG
+
+LERP: (1.0f - t)*A + t*B
+
+t is a normal value
+A - t*A + t*B
+A+t(B - A)
+
+in other words Min + t * Range
+
+We're now baking whether the bitmap is drawn bottom up or top down into the Pitch.
+So right now when bitmaps are loaded the pitch is equal to the bytes per pxiel * the width of the bitmap,
+negated.
+
+You want to be able to draw into bitmaps you draw from because that's what allows you to cache.
+We now draw into a "GroundBuffer" on startup that is cached in the GameState and redrawn as essentially
+the background every frame as one cached bitmap instead of stamping each individual grass/rock bitmap
+every single frame over and over again.
+
+For rendering you want all the routines for drawing to be able to draw _to_ the things you draw _from_.
