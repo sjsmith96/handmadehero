@@ -194,6 +194,10 @@ struct game_state
     // TODO: Change the name to "stored entity"
     uint32 LowEntityCount;
     low_entity LowEntities[100000];
+
+    loaded_bitmap Grass[2];
+    loaded_bitmap Stone[4];
+    loaded_bitmap Tuft[3];
    
     loaded_bitmap Backdrop;
     loaded_bitmap Shadow;
