@@ -1,0 +1,96 @@
+We're using alpha as a mask to tell you how much of the image to draw
+Alpha goes from 0-255
+0 means don't show anything
+255 means opaque
+
+Now we're drawing to an intermediate buffer and then to the screen
+
+From this point onwards I will refer to alpha values being normalized w/ 1 being opaque and 0 being clear
+
+For any given pixel we have the source alpha (the bitmap being blitted)
+And the destination alpha (the buffer we're drawing to)
+
+When we start out we want to destination alpha to be 0 b/c if we drew nothing to the buffer and then
+blitted it to the screen it shouldn't change anything at all.
+
+1st time: Da = Sa
+
+nth time: Da == 0 ? Da = Sa
+          Da == 1 ? Da = 1
+          Sa == 0 ? Da = Da
+
+
+(1 - Da)*Sa + Da OR
+Sa + (1 - Sa)*Da
+
+the variable "InvSa" is just that (1 - Sa) term
+
+We're getting color bleeding through
+
+We had a black buffer
+Sr = .8 Sa = .5
+Dr = 0  Da = 0
+
+New Dr = .4
+New Da =  x
+
+PREMULTIPLIED ALPHA:
+You only ever use the Source R/G/B values once and they're always multiplied by their Real Alpha Value
+So why not store their colors with the alpha value premultiplied into them?
+
+Now we're going to store loaded bitmap colors premultiplied
+
+
+Loading Bitmap Referesher:
+-------------------------------------------------------
+Read the entire file into some buffer
+
+Cast the contents of the read to a bitmap header and store that.
+//bitmap_header *Header = (bitmap_header *)ReadResult.Contents;
+
+The actual pixel data of the loaded bitmap starts at the "bitmap offset" which is defined in the header
+So store that. We cast to an 8 bit pointer to go into the buffer then cast that point to a 32 bit pointer
+//uint32 *Pixels = (uint32 *)((uint8 *)ReadResult.Contents + Header->BitmapOffset);
+
+The width and height of the bitmap are stored in the header.
+We assert that the "compression" value in the header is 3 (IIRC that means its uncompressed RGBA).
+
+The byte order is determined by the header. The RGBA values can come in any order depending on the
+-RedMask
+-GreenMask
+-BlueMask
+Values.
+
+We find the least significant bit set in each of these mask values.
+
+So for example the red mask might look like this in binary:
+11111111 00000000 00000000 00000000 
+or 0xFF000000 in hex
+
+We want to find the index of the least significant set bit of the mask so this case:
+11111111 00000000 00000000 00000000 
+       ^                    
+The index is 24
+That's our RedShift value.
+(On MSVC there's an intrinsic that finds the least signifcant set bit index for you; _BitScanForward)
+
+To find the Red value of a source pixel we take the 32bit pixel, mask it with the RedMask, and shift it down
+that shift value we just computed.
+
+Now we have all our color values.
+The next step is to put them into a 32 bit value in the right place.
+So for us the order is ARGB
+So we shift the red value up 16 bits and OR it with the green value shifted up 8 bits and so on...
+-------------------------------------------------------
+
+What we're doing differently now with the premultiplied alpha is after we calculate those color values
+we normalize the alpha value by dividing it by 255, then multiply that normalized alpha value into
+the RGB values.
+
+Taking the premultiplied alpha into account the new equation for the final alpha value in our draw bitmap call
+is this:
+
+(RSA + RDA - (RSA * RDA)) * 255.0f.
+
+RSA is the normalized alpha value if the source
+RDA is the normalized alpha value of the destination pixel

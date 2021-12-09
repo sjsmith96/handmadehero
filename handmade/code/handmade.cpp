@@ -146,25 +146,26 @@ DrawBitmap(loaded_bitmap *Buffer, loaded_bitmap *Bitmap,
         {
             //
             // NOTE: Alpha Blending (slow because it's going pixel by pixel)
-            // 
-            real32 SA = (real32)((*Source >> 24) & 0xFF) / 255.0f;
-            SA *= cAlpha;
-            real32 SR = (real32)((*Source >> 16) & 0xFF);
-            real32 SG = (real32)((*Source >> 8) & 0xFF);
-            real32 SB = (real32)((*Source >> 0) & 0xFF);
+            //
+
+
+            real32 SA = cAlpha * (real32)((*Source >> 24) & 0xFF);
+            real32 SR = cAlpha * (real32)((*Source >> 16) & 0xFF);
+            real32 SG = cAlpha * (real32)((*Source >> 8) & 0xFF);
+            real32 SB = cAlpha * (real32)((*Source >> 0) & 0xFF);
+            real32 RSA = cAlpha * (SA / 255.0f);
 
             real32 DA = (real32)((*Dest >> 24) & 0xFF);
             real32 DR = (real32)((*Dest >> 16) & 0xFF);
             real32 DG = (real32)((*Dest >> 8) & 0xFF);
             real32 DB = (real32)((*Dest >> 0) & 0xFF);
+            real32 RDA = (DA / 255.0f);
 
-            // TODO: Someday we need to talk about premultiplied alpha
-            // (this is not premultiplied alpha)
-            // TODO: Compute the right alpha here
-            real32 A = Maximum(DA, 255.0f*SA);
-            real32 R = (1.0f - SA)*DR + SA*SR;
-            real32 G = (1.0f - SA)*DG + SA*SG;
-            real32 B = (1.0f - SA)*DB + SA*SB;
+            real32 InvRSa = (1.0f - RSA);
+            real32 A = 255.0f*(RSA + RDA - RSA*RDA);
+            real32 R = InvRSa*DR + SR;
+            real32 G = InvRSa*DG + SG;
+            real32 B = InvRSa*DB + SB;
 
             *Dest = (((uint32)(A + 0.5f) << 24) |
                      ((uint32)(R + 0.5f) << 16) | /* "or" the RBG together with truncation */
@@ -252,10 +253,10 @@ DEBUGLoadBMP(thread_context *Thread, debug_platform_read_entire_file *ReadEntire
         Assert(AlphaScan.Found);
 
 
-        int32 RedShift = 16 - (int32)RedScan.Index;
-        int32 GreenShift = 8 - (int32)GreenScan.Index;
-        int32 BlueShift = 0 - (int32)BlueScan.Index;
-        int32 AlphaShift = 24 - (int32)AlphaScan.Index;
+        int32 RedShiftDown = (int32)RedScan.Index;
+        int32 GreenShiftDown = (int32)GreenScan.Index;
+        int32 BlueShiftDown = (int32)BlueScan.Index;
+        int32 AlphaShiftDown = (int32)AlphaScan.Index;
         
 
         
@@ -270,11 +271,22 @@ DEBUGLoadBMP(thread_context *Thread, debug_platform_read_entire_file *ReadEntire
             {
                 uint32 C = *SourceDest;
 
+                real32 R = (real32)((C & RedMask) >> RedShiftDown);
+                real32 G = (real32)((C & GreenMask) >> GreenShiftDown);
+                real32 B = (real32)((C & BlueMask) >> BlueShiftDown);
+                real32 A = (real32)((C & AlphaMask) >> AlphaShiftDown);
+                real32 AN = (A / 255.0f);
 
-                *SourceDest++ = ((RotateLeft(C & RedMask, RedShift) |
-                                  RotateLeft(C & GreenMask, GreenShift) |
-                                  RotateLeft(C & BlueMask, BlueShift) |
-                                  RotateLeft(C & AlphaMask, AlphaShift)));
+#if 1
+                R = R*AN;
+                G = G*AN;
+                B = B*AN;
+#endif
+                
+                *SourceDest++ = (((uint32)(A + 0.5f) << 24) |
+                                 ((uint32)(R + 0.5f) << 16) | /* "or" the RBG together with truncation */
+                                 ((uint32)(G + 0.5f) << 8) |
+                                 ((uint32)(B + 0.5f) << 0));
                 
             }
         }
@@ -650,6 +662,7 @@ MakeNullCollision(game_state *GameState)
 internal void
 DrawTestGround(game_state *GameState, loaded_bitmap *Buffer)
 {
+    
     // TODO: Make random number generation more systemic.
     random_series Series = RandomSeed(1234);
 
@@ -659,13 +672,15 @@ DrawTestGround(game_state *GameState, loaded_bitmap *Buffer)
         ++GrassIndex)
     {
         loaded_bitmap *Stamp = 0;
+
         if(RandomChoice(&Series, 2))
         {
             Stamp = GameState->Grass + (RandomChoice(&Series, ArrayCount(GameState->Grass)));
         }
         else
+
         {
-            Stamp = GameState->Stone + (RandomChoice(&Series, ArrayCount(GameState->Stone)));
+            Stamp = GameState->Stone;// + (RandomChoice(&Series, ArrayCount(GameState->Stone)));
         }
         real32 Radius = 5.0f;
         v2 BitmapCenter = 0.5f*V2i(Stamp->Width, Stamp->Height);
@@ -820,8 +835,8 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         Bitmap->Align = V2(72, 182);
         ++Bitmap;
 
-
-        random_series Series = RandomSeed(1234);
+        //TODO: RandomSeed doesn't work right
+        random_series Series = {1234};
         
      
         uint32 ScreenBaseX = 0;
@@ -1008,7 +1023,6 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         // TODO: This may be more appropriate to do in the platform layer.
         Memory->IsInitialized = true;
     }
-
 
     world *World = GameState->World;
     
