@@ -1,0 +1,13 @@
+There are two memory areas.
+One memory area is for permanent storage that needs to be preserved from frame to frame.
+The other area is for transient storage that doens't need to be preserved from frame to frame.
+
+LRU - "Least recently used"
+
+We're going to be looping through the array of ground buffers seeing which ones we need to render
+If we encoutner one that doesn't need to be rendered we could do array compaction --
+moving subsequent elements down and shuffling it down past the elements that actually need to get rendered
+
+If you needed to allocate memory and you didn't know how much the program would need you could just ask
+the system for another block of memory every time you ran out, linking them together and freeing them
+all when you're done.

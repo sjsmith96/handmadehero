@@ -1,3 +1,4 @@
+
 /* ========================================================================
    $File: $
    $Date: $
@@ -99,14 +100,14 @@ Win32GetEXEFileName(win32_state *State)
     // NOTE: Never use MAX_PATH in code that is user-facing, because
     // it can be dangerous and lead to bad results.
     DWORD SizeOfFileName = GetModuleFileName(0, State->EXEFileName, sizeof(State->EXEFileName));
-    State->OnePastEXEFileNameSlash = State->EXEFileName;
+    State->OnePastLastEXEFileNameSlash = State->EXEFileName;
     for(char *Scan = State->EXEFileName;
         *Scan;
         *Scan++)
     {
         if(*Scan == '\\')
         {
-            State->OnePastEXEFileNameSlash = Scan + 1;
+            State->OnePastLastEXEFileNameSlash = Scan + 1;
         }
         
     }
@@ -130,7 +131,7 @@ Win32BuildEXEFileName(win32_state *State, char* Filename,
                       int DestCount, char *Dest)
 {
 
-    CatStrings(State->OnePastEXEFileNameSlash - State->EXEFileName, State->EXEFileName,
+    CatStrings(State->OnePastLastEXEFileNameSlash - State->EXEFileName, State->EXEFileName,
                StringLength(Filename), Filename,
                DestCount, Dest);
 
@@ -159,7 +160,7 @@ DEBUG_PLATFORM_READ_ENTIRE_FILE(DEBUGPlatformReadEntireFile)
         LARGE_INTEGER FileSize;
         if(GetFileSizeEx(FileHandle, &FileSize))
         {
-            uint32 FileSize32 = SafeTruncateuInt64(FileSize.QuadPart);
+            uint32 FileSize32 = SafeTruncateUInt64(FileSize.QuadPart);
             Result.Contents = VirtualAlloc(0, FileSize32, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
             if(Result.Contents)
             {
@@ -1306,10 +1307,10 @@ WinMain(HINSTANCE Instance,
 
                     
                 Win32GetInputFileLocation(&Win32State, false, ReplayIndex,
-                                          sizeof(ReplayBuffer->ReplayFilename), ReplayBuffer->ReplayFilename);
+                                          sizeof(ReplayBuffer->FileName), ReplayBuffer->FileName);
     
                 ReplayBuffer->FileHandle =
-                    CreateFileA(ReplayBuffer->ReplayFilename, GENERIC_WRITE|GENERIC_READ, 0, 0, CREATE_ALWAYS, 0, 0);
+                    CreateFileA(ReplayBuffer->FileName, GENERIC_WRITE|GENERIC_READ, 0, 0, CREATE_ALWAYS, 0, 0);
 
                 LARGE_INTEGER MaxSize;
                 MaxSize.QuadPart = Win32State.TotalSize;

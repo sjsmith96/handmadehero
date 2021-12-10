@@ -96,7 +96,7 @@ typedef double real64;
 /* TODO: Swap min_, max_, ... macros??? */
 
 inline uint32
-SafeTruncateuInt64(uint64 Value)
+SafeTruncateUInt64(uint64 Value)
 {
     // TODO: Defines for Maximum values uInt32Max
     Assert(Value <= 0xFFFFFFFF);

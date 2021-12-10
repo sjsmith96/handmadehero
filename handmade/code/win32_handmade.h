@@ -70,7 +70,7 @@ struct win32_replay_buffer
 {
     HANDLE FileHandle;
     HANDLE MemoryMap;
-    char ReplayFilename[WIN32_STATE_FILE_NAME_COUNT];
+    char FileName[WIN32_STATE_FILE_NAME_COUNT];
     void *MemoryBlock;
 };
 struct win32_state
@@ -86,7 +86,7 @@ struct win32_state
     int InputPlayingIndex;
 
     char EXEFileName[WIN32_STATE_FILE_NAME_COUNT];
-    char *OnePastEXEFileNameSlash;
+    char *OnePastLastEXEFileNameSlash;
 
 };
 
