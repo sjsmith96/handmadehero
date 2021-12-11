@@ -1,0 +1,92 @@
+We want the game code to issue a set of instructions to the renderer, but we don't want them to actually
+be executed right away. Hence the push buffer.
+
+We do it this way because:
+- we want to be able to sort. The game code shouldn't  have to worry about any sorting logic or anything like that.
+- related to sorting we can also process the push buffer and translate it into something that can be rendered by opengl, direct3d, mantle, vulcan, our software renderer etc.
+It's almost like an IR 
+
+Our software renderer is going to be doing "GPU-esque rendering"
+We're going to be writing a renerer that's going to work roughly the way a GPU would.
+    - Slower than if we didn't.
+    - All the insight
+There is no point in shipping a software renderer.
+
+Explicit surface rasterizer (aka Scan-line):
+Imagine you're drawing a triangle
+Imagine the grid of pixels
+    - What scan lines does the triangle touch and what is the span on the triangle?
+    - I think this is how Sean Barrett's stbtt font rasterizer does things?
+
+We're going to be using an implicit surface rasterizer
+Imagine the triangle example again
+    - We're going to look at bins of certain size of pixels. 16 for example (so 4x4 square)
+    - The first step is to determine what 4x4 boundaries might the triangle touch on the screen?
+    - For all the 4x4s the triangle touches we will compute the results for _all_ of those pixels even if the're not filled in.
+    - We will mask away the pixels that aren't filled and fill only the correct ones.
+This scheme is how gpus work
+                                (primatives)     (shaders)
+Push buffer -> binning phase -> 4x4 selection -> 4x4 rasterizer
+                                                        ^
+                                                        |
+                                                 4x SSE2 - 4 wide (minimum target)
+                                                 2x Avx256 - 8 wide
+                                                 1x Avx512  - 16 wide
+
+Rectangles
+
+We renamed entity_visisible_peice to render_group_entry
+
+We don't want anything that isn't relatively expensive to render to be in the push buffer as a single item.
+We want to aggregate render commands up as far as we can.
+Imagine a particle system for example. We don't want to push every individual rectangle for each particle into the push buffer.
+
+The push buffer is basically going to be a compressed array of multiple different types of entries all
+with diffent size.
+So when Rendering group to output we switch on the type of entry we're at in the loop and increment
+the address pointer by the size of the type of entry.
+Now that we know what type the entry is we can assign it to that type (render_entry_clear) for example.
+
+
+        switch(TypelessEntry->Type)
+        {
+            case RenderGroupEntry_Clear:
+            {
+                render_entry_clear *Entry = (render_entry_clear *)Entry;
+                
+                BaseAddress += sizeof(*Entry);
+            } break;
+         }
+         
+Basically a discriminated union
+
+WILD SHIT:
+----------
+
+Each element in the enum for our render_group_entries start with the same prefix "RenderGroupEntry"
+Then the literally _TEXTUALLY IDENTICAL_ name of the render group type. E.g. RenderGroupEntry_render_entry_clear.
+
+Our PushRenderElement function takes a render group and pushes onto it a size and returns a pointer to a header for the render group.
+We define a macro for that function that take the group and a type:
+
+#define PushRenderElement(Group, type)
+
+That macro passes through the group and the size of the type and also the _ACTUAL TYPE ITSELF_ with this nifty trick
+RenderGroupEntry##_type
+
+We then also cast the  pointer that function returns to (type *) for good measure.
+
+The full macro looks like this.
+#define PushRenderElement(Group, type) (type *)PushRenderElement_(Group, sizeof(type), RenderGroupEntry_##type)
+
+Summary:
+----------
+
+Today we mostly pulled out the different things we were drawing into render_group_entry_types
+We pulled them into a compact discriminated union. Each entry type has a header which tells us the type
+That type is switched on in the draw call and tells us the size of the struct speccing out what we need to draw is
+
+We also pulled out the "entity basis" concept into its own struct called "render_entity_basis"
+Each entity has a basis point we draw each render group entry a certain offset from.
+
+The ryg blog
