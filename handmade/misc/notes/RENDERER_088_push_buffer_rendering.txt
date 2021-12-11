@@ -1,0 +1,72 @@
+RENDERER FOR REAL THIS TIME LFG!!!!!!
+
+We need to buffer things up so we can sort them.
+
+We're allocating "piece groups" (which will eventually become render groups) dynamically now
+in the transient Arena with the PushStruct() call.
+
+"piece groups" are a group of "pieces" that need to be rendered.
+
+a "piece" could be a bitmap or rectangle currently in our code
+
+Now that we push all these pieces into a giant push buffer we have a problem
+
+We no longer know after we push the entity which piece goes with which entity and therefore where it was
+supposed to be drawn relative to.
+
+Our solution is to have a "render basis" that is the default basis everything we're going to render is
+relative to.
+
+So when we initialize our "piece group" (which is actually our renderer) we set the defualt basis to
+something that doesn't actually displace anything (0, 0, 0).
+
+Then, when we want to change the basis we're rendering from we "push" or add a new basis to that piece group
+and set its position to whatever we want the new basis to be. In our case the Entity's ground point.
+
+So our pipeline right now works like this:
+1. We create a piece group and just initalize everything to default values
+2. We loop over the entities in the sim region
+3. For each entity in the sim region we create a basis for that piece group and set it to the default basis for the group
+4. Each entity has different pieces to draw depending on what it is. A hero has a head, cape torso and so on for example
+5. We push each piece. In PushPiece() the piece's basis gets set to whatever the piece group's default basis is currently.
+6. After pushing those pieces into the renderer's buffer we set the Basis' position to be the ground point of the entity
+7. Go back to step 1
+
+After pushing all the stuff to get rendered we then loop through and render all of it. Each piece will
+be drawn in the correct spot b/c its basis will be set to whatever the default basis was at the time
+it was pushed (the ground position of the entity it represents).
+
+We're also allocating temporary memory for this "piece group" (once again, actually just our push buffer)
+in the Transient Arena just like with the sim region, then deallocating it at the end of the frame.
+
+So essentially we just snap the pointer to the free memory in our transient arena back to where it started
+at the beginning of the frame (where we called BeginTemporaryMemory).
+
+Instead of having an array of pieces we're going to have some memory called a push buffer. Just a uint8 *.
+When you push things onto the buffer you push things of a certain size onto the buffer.
+
+We have an AllocateRenderGroup call that allocates us a render group of a certain size we pass into it.
+It's going to take in a memory arena.
+It's going to push space for itself onto the arena.
+Then, it's going to push space for the push buffer onto the Arena.
+
+We now push pieces into the push buffer through a PushRenderElement call which pushes a size onto the render group
+We check to see if the size we're asking to push will fit.
+If it does fit, we add the size to the pushbufferbase pointer, increment the pushbuffersize, and return the new base pointer
+If it doesn't fit that's an invalid code path atm.
+
+Summary:
+
+We had a thing called a piece group.
+We wanted to draw entities that were multiple pieces. The hero for example was head, cape, torso, and shadow.
+These pieces were all offset from the same point, but we didn't know the actual point until after we had
+already executed the code that wanted to assemble those pieces.
+So what it did was just record the offsets they would be at from the point (we didn't know yet).
+When we knew what the point was we would walk through the bitmaps we recorded and draw them using the basis points we now knew.
+
+We turned this piece group into a render group.
+The render group is just some memory that we write into it the things we want drawn
+So we did the exact same thing as the piece group. The render group is still all visible piece groups.
+But we're going to turn this into a heterogenous buffer that can hold basically a list of commands we
+want the renderer to execute. Draw a bitmap, clear the screen, draw a rectangle etc.
+

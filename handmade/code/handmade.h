@@ -98,6 +98,7 @@ InitializeArena(memory_arena *Arena, memory_index Size, void *Base)
 
 #define PushStruct(Arena, type) (type *)PushSize_(Arena, sizeof(type))
 #define PushArray(Arena, Count, type) (type *)PushSize_(Arena, (Count) * sizeof(type))
+#define PushSize(Arena, Size) PushSize_(Arena, Size)
 inline void *                
 PushSize_(memory_arena *Arena, memory_index Size)
 {
@@ -185,17 +186,6 @@ struct low_entity
     sim_entity Sim;
 };
 
-struct entity_visible_piece
-{
-    loaded_bitmap *Bitmap;
-    v2 Offset;
-    real32 OffsetZ;
-    real32 EntityZC;
-    
-    real32 R, G, B, A;
-    v2 Dim;
-};
-
 struct controlled_hero
 {
     uint32 EntityIndex;
@@ -222,7 +212,7 @@ struct ground_buffer
 {
     // NOTE: An invalid P tells us that this ground buffer has not been filled.
     world_position P; // NOTE: This is the center of the bitmap
-    void *Memory;
+    loaded_bitmap Bitmap;
 };
 
 struct game_state
@@ -230,6 +220,8 @@ struct game_state
 
     memory_arena WorldArena;
     world *World;
+
+    real32 TypicalFloorHeight;
 
     // TODO: Should we allow split-screen?
     uint32 CameraFollowingEntityIndex;
@@ -254,6 +246,7 @@ struct game_state
     loaded_bitmap Sword;
     loaded_bitmap Stairwell;
     real32 MetersToPixels;
+    real32 PixelsToMeters;
 
     // TODO: Must be power of two
     pairwise_collision_rule *CollisionRuleHash[256];
@@ -275,18 +268,7 @@ struct transient_state
     bool32 IsInitialized;
     memory_arena TranArena;    
     uint32 GroundBufferCount;
-    loaded_bitmap GroundBitmapTemplate;
     ground_buffer *GroundBuffers;   
-};
-
-// TODO: This is dumb. This should just be part of
-// The renderer pushbuffer. Add correction of coordinates in there
-// and be done with it.
-struct entity_visible_piece_group
-{
-    game_state *GameState;
-    uint32 PieceCount;
-    entity_visible_piece Pieces[32];
 };
 
 

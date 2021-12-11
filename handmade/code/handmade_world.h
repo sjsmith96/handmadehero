@@ -50,8 +50,6 @@ struct world_chunk
 struct world
 {
 
-    real32 TileSideInMeters;
-    real32 TileDepthInMeters;
     v3 ChunkDimInMeters;
 
     // TODO: WorldChunkHash should probably switch to pointers IF

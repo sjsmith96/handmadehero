@@ -51,6 +51,7 @@ extern "C" {
 //
 #include <stdint.h>
 #include <stddef.h>
+#include <float.h>
     
 typedef uint8_t uint8;
 typedef uint16_t uint16;
@@ -68,6 +69,7 @@ typedef size_t memory_index;
 typedef float real32;
 typedef double real64;
 
+#define Real32Maximum FLT_MAX
     
 #define internal static 
 #define local_persist static
@@ -220,7 +222,7 @@ typedef struct debug_read_file_result
         int32 MouseX, MouseY, MouseZ;
     
         // TODO: Insert clock values here.
-
+        bool32 ExecutableReloaded;
         real32 dtForFrame;
     
         game_controller_input Controllers[5];
