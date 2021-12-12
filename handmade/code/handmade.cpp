@@ -1374,12 +1374,12 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     }
     
     GameState->Time += Input->dtForFrame;
-    real32 Angle = GameState->Time;
+    real32 Angle =  GameState->Time;
     v2 Origin = ScreenCenter;
-    v2 XAxis = 100.0f*V2(Cos(Angle), Sin(Angle));
-    v2 YAxis = V2(-XAxis.y, XAxis.x);
+    v2 XAxis = (50.0f + 50.0f*Cos(Angle))*V2(Cos(Angle), Sin(Angle));
+    v2 YAxis = (50.0f + 50.0f*Cos(Angle))*V2(Cos(Angle + 1.0f), Sin(Angle + 1.0f));
     uint32 PIndex = 0;
-    render_entry_coordinate_system *C = CoordinateSystem(RenderGroup, Origin, XAxis, YAxis, V4(1, 1, 0, 1));
+    render_entry_coordinate_system *C = CoordinateSystem(RenderGroup, Origin, XAxis, YAxis, V4(0.5f+0.5f*Sin(Angle), 0.5f+0.5f*Sin(2.9f*Angle), 0.5f+0.5f*Cos(9.9f*Angle), 1));
     for(real32 Y = 0.0f;
         Y < 1.0f;
         Y += 0.25f)
@@ -1392,7 +1392,6 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         }
         
     }
-    CoordinateSystem(RenderGroup, Origin, XAxis, YAxis, V4(1, 1, 0, 1));
 
     RenderGroupToOutput(RenderGroup, DrawBuffer);
 

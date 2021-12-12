@@ -1,0 +1,18 @@
+What pixels are filled?
+
+If we were to rotate and scale an entire rectangle, what would we actually fill on the screen?
+What are all of the pixels that would actually be included in the rectangle?
+
+For testing to see if a certain point is inside a rectangle we did
+x >= min.x &&
+x < max.x &&
+y >= min.y &&
+y < max.y
+
+This is an "edge test"
+
+For a rotated and scaled rectangle we could devise a similar edgetest
+
+Inner(p - origin, perp)
+If the sign of the dot product is positive it is outside the edge
+If it's negative its inside the edge.

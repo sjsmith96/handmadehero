@@ -332,6 +332,13 @@ Clamp01(v2 Value)
     return Result;
 }
 
+inline v2
+Perp(v2 A)
+{
+    v2 Result = {-A.y, A.x};
+    return Result;
+}
+
 
 //
 // NOTE: v3 Operations
