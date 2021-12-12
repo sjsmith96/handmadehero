@@ -1,0 +1,16 @@
+Rotation and scaling can be achieved by rotating and scaling the basis vectors you're using to construct the shape/bitmap w/e it is you're drawing
+
+The new point is the origin plus the x coordinate of the original point along the x axis plus the y coordinate of the orignal point along the y axis
+
+xaxis = (cos(theta), sin(theta))
+yaxis = (-sin(theta), cos(theta))
+
+To scale you multiply those x and y axis vectors by the scale
+
+Perp operator takes a 2d vector and produces a vector that is perpendicular to it
+f(x, y) -> (-y, x)
+
+rotation by theta -> x axis = cos(theta), sin(theta)
+                     y axis = perp(x axis)
+
+P = Entry->Origin + P.x*Entry->XAxis + P.y*Entry->YAxis;

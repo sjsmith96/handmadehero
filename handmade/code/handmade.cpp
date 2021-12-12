@@ -1372,6 +1372,28 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             Basis->P = GetEntityGroundPoint(Entity);
         }
     }
+    
+    GameState->Time += Input->dtForFrame;
+    real32 Angle = GameState->Time;
+    v2 Origin = ScreenCenter;
+    v2 XAxis = 100.0f*V2(Cos(Angle), Sin(Angle));
+    v2 YAxis = V2(-XAxis.y, XAxis.x);
+    uint32 PIndex = 0;
+    render_entry_coordinate_system *C = CoordinateSystem(RenderGroup, Origin, XAxis, YAxis, V4(1, 1, 0, 1));
+    for(real32 Y = 0.0f;
+        Y < 1.0f;
+        Y += 0.25f)
+    {
+        for(real32 X = 0.0f;
+            X < 1.0f;
+            X += 0.25f)
+        {
+            C->Points[PIndex++] = V2(X, Y);
+        }
+        
+    }
+    CoordinateSystem(RenderGroup, Origin, XAxis, YAxis, V4(1, 1, 0, 1));
+
     RenderGroupToOutput(RenderGroup, DrawBuffer);
 
     EndSim(SimRegion, GameState);

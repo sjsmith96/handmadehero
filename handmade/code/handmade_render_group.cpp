@@ -302,6 +302,32 @@ RenderGroupToOutput(render_group *RenderGroup, loaded_bitmap *OutputTarget)
                 
                 BaseAddress += sizeof(*Entry);
             } break;
+            case RenderGroupEntry_render_entry_coordinate_system:
+            {
+                render_entry_coordinate_system *Entry = (render_entry_coordinate_system *)Header;
+                v2 Dim = {2, 2};
+                
+                v2 P = Entry->Origin;
+                DrawRectangle(OutputTarget, P - Dim, P + Dim, Entry->Color.r, Entry->Color.g, Entry->Color.b);
+                
+                P = Entry->Origin + Entry->XAxis;
+                DrawRectangle(OutputTarget, P - Dim, P + Dim, Entry->Color.r, Entry->Color.g, Entry->Color.b);
+                
+                P = Entry->Origin + Entry->YAxis;
+                DrawRectangle(OutputTarget, P - Dim, P + Dim, Entry->Color.r, Entry->Color.g, Entry->Color.b);
+
+                for(uint32 PIndex = 0;
+                    PIndex < ArrayCount(Entry->Points);
+                    ++PIndex)
+                {
+                    v2 P = Entry->Points[PIndex];
+                    P = Entry->Origin + P.x*Entry->XAxis + P.y*Entry->YAxis;
+                    DrawRectangle(OutputTarget, P - Dim, P + Dim, Entry->Color.r, Entry->Color.g, Entry->Color.b);
+                }
+                
+                
+                BaseAddress += sizeof(*Entry);
+            } break;
             InvalidDefaultCase;
         }
 
@@ -408,7 +434,6 @@ PushRectOutline(render_group *Group, v2 Offset, real32 OffsetZ,
     PushRect(Group, Offset + V2(0.5f*Dim.x, 0), OffsetZ, V2(Thickness, Dim.y), Color, EntityZC);
 }
 
-
 inline void
 Clear(render_group *Group, v4 Color)
 {
@@ -418,5 +443,22 @@ Clear(render_group *Group, v4 Color)
         Entry->Color = Color;
     }
 }
+
+
+inline render_entry_coordinate_system *
+CoordinateSystem(render_group *Group, v2 Origin, v2 XAxis, v2 YAxis, v4 Color)
+{
+    render_entry_coordinate_system *Entry = PushRenderElement(Group, render_entry_coordinate_system);
+    if(Entry)
+    {
+        Entry->Origin = Origin;
+        Entry->XAxis = XAxis;
+        Entry->YAxis = YAxis;
+        Entry->Color = Color;
+    }
+
+    return Entry;
+}
+
 
 
