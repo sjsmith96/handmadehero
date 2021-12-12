@@ -1,0 +1,33 @@
+When allocating a render group we specify a MetersToPixels value that all position values get multiplied by.
+All of our vectors get transformed from Meter to Pixel space inside the renderer.
+So if we want to actually pass the renderer pixel values we pass in a "MetersToPixels" value of 1.
+
+"Basis" or "Axis"
+
+imagine the x axis as a unit vector and P as some
+pTv = |p||v|cos
+
+Axes tend to have two properties:
+1. Unit length
+2. orthoginal ("orthonormal" = orthoginal and unit length"
+    motion along the y axis doesn't change the motion along the x axis at all (and vice versa)
+    you can consider the location of a point (x, y) along its two axis completely independently of eachother
+    
+xTy = 0
+yTz = 0
+xtz = 0
+All of these are true because the cos of 90 degrees is 0 (unit circle)
+
+Meters to pixels is a basis change
+So is "negate y"
+
+In our game we were describing things in terms of world space
+Every unit was a meter
+The y axis pointed up
+This was our world space basis
+
+When we render, we changed the basis to screen space
+Every unit was a pixel
+The y axis pointed down
+
+Hence MetersToPixels and negate y
