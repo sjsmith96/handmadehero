@@ -1,0 +1,4 @@
+For gamma correction we need to change the sRGB values the artist drew the art in into linear space
+to do our bilinear filtering on it and then change it back to sRGB for the monitor.
+
+premultiplied alpha is the only alpha that works w/ linear blends
