@@ -467,6 +467,146 @@ Clamp01(v3 Value)
     return Result;
 }
 
+//
+// NOTE: v4 operation
+//
+
+inline v4
+operator*(real32 A, v4 B)
+{
+    v4 Result;
+ 
+    Result.x = (A * B.x);
+    Result.y = (A * B.y);
+    Result.z = (A * B.z);
+    Result.w = (A * B.w);
+
+    return Result;
+}
+
+inline v4
+operator*(v4 B, real32 A)
+{
+    v4 Result = A * B;
+ 
+    return Result;
+}
+
+
+inline v4 
+operator*=(v4 &A, real32 B)
+{
+    A = (B * A);
+    return A;
+}
+
+inline v4
+operator-(v4 A)
+{
+    v4 Result;
+
+    Result.x = -A.x;
+    Result.y = -A.y;
+    Result.z = -A.z;
+    Result.w = -A.w;
+    
+
+    return Result;
+}
+
+inline v4
+operator+(v4 A, v4 B)
+{
+    v4 Result;
+
+    Result.x = A.x + B.x;
+    Result.y = A.y + B.y;
+    Result.z = A.z + B.z;
+    Result.w = A.w + B.w;
+
+    return Result;
+}
+
+
+inline v4 &
+operator+=(v4 &A, v4 B)
+{
+    A = A + B;
+    
+    return(A);
+
+}
+
+
+inline v4
+operator-(v4 A, v4 B)
+{
+    v4 Result;
+
+    Result.x = A.x - B.x;
+    Result.y = A.y - B.y;
+    Result.z = A.z - B.z;
+    Result.w = A.w - B.w;
+
+    return Result;
+}
+
+inline v4
+Hadamard(v4 A, v4 B)
+{
+    v4 Result = {A.x * B.x, A.y * B.y, A.z * B.z, A.w * B.w};
+    return Result;
+}
+
+inline real32
+Inner(v4 A, v4 B)
+{
+    // NOTE: Dot product. aTb = ac + bd;
+    real32 Result = (A.x * B.x) + (A.y * B.y) + (A.z * B.z) + (A.w * B.w);
+
+    return Result;
+}
+
+inline real32
+LengthSq(v4 A)
+{
+    // aTa = |a|^2
+    real32 Result = Inner(A, A);
+
+    return Result;
+}
+
+
+inline real32
+Length(v4 A)
+{
+    real32 Result = SquareRoot(LengthSq(A));
+    
+    return Result;
+}
+
+
+inline v4
+Clamp01(v4 Value)
+{
+    v4 Result;
+
+    Result.x = Clamp01(Value.x);
+    Result.y = Clamp01(Value.y);
+    Result.z = Clamp01(Value.z);
+    Result.w = Clamp01(Value.w);
+    
+    return Result;
+}
+
+inline v4
+Lerp(v4 A, real32 t, v4 B)
+{
+    v4 Result = (1.0f - t) * A + t * B;
+
+    return Result;
+}
+
 
 //
 // NOTE: Rectangle2 operations

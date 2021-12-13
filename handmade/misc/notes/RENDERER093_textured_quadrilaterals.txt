@@ -1,0 +1,39 @@
+In our DrawRectangleSwowly call, instead of setting the pixel color to the color passed in the v4,
+we want to set the pixel color to a color we read from the texture bitmap.
+
+We basis vectors and stuff to draw our rectangles
+How do we map the pixels from a texture into there and draw them?
+
+When people talk about the coordinate system of a texture they talk about it in terms of (u,v)
+
+U being basically the x axis and v being the y.
+They go from 0 to 1.
+
+The proportion of the x axis and the proportion of the y axis you need to walk to find a pixel in screen
+space will tell you the (u,v) coordinates that would map onto texture space.
+
+to find a point's normalized distance along the y axis:
+|d||y|cos(theta) / |y|^2
+dTy / |y|^2
+
+to find a point's normalized distance along the x axis:
+|d||x|cos(theta) / |x|^2
+OR
+dTx / |x|^2
+
+(remember that the length of d is actually (d - origin))
+
+This will give you the (u,v) coordinates into the texture
+
+
+Recall that dTx is "The dot product (or transpose) of d and x"
+Which is equal to :
+|d||x|cos(theta)
+OR
+(d.x * x.x) + (d.y * x.y)
+
+For sub-pixel precision of translating texel to pixel space You do a linear interpolation between all of the
+texels a pixel would encompass
+
+Bilinear filtering
+v4 Texel = Lerp(Lerp(TexelA, fX, TexelB), fY, Lerp(TexelC, fX, TexelD));
