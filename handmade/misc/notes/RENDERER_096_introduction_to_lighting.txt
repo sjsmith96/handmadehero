@@ -1,0 +1,3 @@
+Lighting is the sound of graphics
+
+Lighting is fundamentally a "directional" effect
