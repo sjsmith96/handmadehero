@@ -1,0 +1,5 @@
+We can't do the alpha premultiplication upon loading the bitmap because then the alpha premultiplication
+happens in sRGB space instead of linear-light space.
+
+So we know multiply the colors by their alpha values in the Bitmap rendering call after converting the
+Texels to Linear space

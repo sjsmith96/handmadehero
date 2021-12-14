@@ -1,7 +1,7 @@
 @echo off
 
 
-set CommonCompilerFlags=-MTd -nologo /fp:fast -Gm- -EHa- -Od -GR- -Oi -WX -W4 -wd4201 -wd4100 -wd4189 -wd4456 -wd4505 -DHANDMADE_INTERNAL=1 -DHANDMADE_SLOW=1 -DHANDMADE_WIN32=1 -FC -Z7
+set CommonCompilerFlags=-MTd -nologo /fp:fast -Gm- -EHa- -Zo -Od -GR- -Oi -WX -W4 -wd4201 -wd4100 -wd4189 -wd4456 -wd4505 -DHANDMADE_INTERNAL=1 -DHANDMADE_SLOW=1 -DHANDMADE_WIN32=1 -FC -Z7
 set CommonLinkerFlags=-incremental:no -opt:ref user32.lib Gdi32.lib winmm.lib
 
 REM TODO - can we just build both x86 and x64 with one exe?
