@@ -1,5 +1,13 @@
 #if !defined(HANDMADE_RENDER_GROUP_H)
 
+struct environment_map
+{
+    // NOTE: LOD[0] is 2^WidthPow2 x 2^HeightPow2
+    int32 WidthPow2;
+    int32 HeightPow2;
+    loaded_bitmap *LOD[4];
+};
+
 struct render_basis
 {
     v3 P;
@@ -40,8 +48,12 @@ struct render_entry_coordinate_system
     v2 YAxis;
     v4 Color;
     loaded_bitmap *Texture;
+    loaded_bitmap *NormalMap;
+    
+    environment_map *Top;
+    environment_map *Middle;
+    environment_map *Bottom;
 
-    v2 Points[16];
 };
 
 struct render_entry_bitmap

@@ -1,0 +1,16 @@
+Normal Maps:
+
+1 - Description of the surface
+2 - Description of the light
+3 - Equation in terms
+    - Normal
+    - View direction
+    - Light direction
+
+The equation needs to take a description of the surface and output a light value.
+
+We have the texture for the tree
+We need a map of vectors instead of RGB values that's going to encode the normal.
+Every texel on the normal map will have x,y,z values from 0-255
+
+I DID NOT UNDERSTAND THIS EPISODE AT ALL

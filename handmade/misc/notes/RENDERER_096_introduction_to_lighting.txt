@@ -1,3 +1,33 @@
 Lighting is the sound of graphics
 
 Lighting is fundamentally a "directional" effect
+
+For games we want:
+- Diffuse surfaces
+    - chalk
+    - light scatters in all directions evenly (diffusely)
+    
+- "glossy" surfaces
+    - some of the light reflects out the opposite direction but some of it scatters
+
+- highly reflective surfaces
+    - mirrors
+    - light reflects right back out the opposite direction
+
+Approximations
+
+"Light probing (indirect light sampling)"
+    - Can we compute lookup tables or something like that that would let us look at all the different light
+    sources that are coming into a surface?
+    
+What do we do in 2d?
+Problems:
+ - We don't know what the surfaces are
+    - normal maps:
+        - you have a bitmap of your texture
+        - you store a second map but instead of RBG you store XYZ of a vector that points in the
+        direction the surface is pointing at that time
+- We don't know what the light field is
+    - point lights
+    - light rendering
+        -
