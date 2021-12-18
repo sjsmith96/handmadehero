@@ -620,8 +620,8 @@ MakeEmptyBitmap(memory_arena *Arena, int32 Width, int32 Height, bool32 ClearToZe
 internal void
 MakeSphereNormalMap(loaded_bitmap *Bitmap, real32 Roughness)
 {
-    real32 InvWidth = 1.0f / (1.0f - Bitmap->Width);
-    real32 InvHeight = 1.0f / (1.0f - Bitmap->Height);
+    real32 InvWidth = 1.0f / (Bitmap->Width - 1.0f);
+    real32 InvHeight = 1.0f / (Bitmap->Height - 1.0f);
 
         
     uint8 *Row = (uint8 *)Bitmap->Memory;
@@ -636,19 +636,28 @@ MakeSphereNormalMap(loaded_bitmap *Bitmap, real32 Roughness)
             ++X)
         {
             v2 BitmapUV = V2(InvWidth * (real32)X, InvHeight*(real32)Y);
-            // TODO: Actually generate sphere!!!
-            v3 Normal = V3(2.0f*BitmapUV.x - 1.0f, 2.0f*BitmapUV.y - 1.0f, 0.0f);
-            Normal.z = SquareRoot(1.0f - Minimum(1.0f, Square(Normal.x) + Square(Normal.y)));
+
+            real32 Nx = 2.0f*BitmapUV.x - 1.0f;
+            real32 Ny = 2.0f*BitmapUV.y - 1.0f;
+
+            real32 RootTerm = 1.0f - Square(Nx) - Square(Ny);
+            v3 Normal = {0, 0, 1};
+            real32 Nz = 0.0f;
+            if(RootTerm >= 0.0f)
+            {
+                Nz = SquareRoot(RootTerm);
+                Normal = V3(Nx, Ny, Nz);
+            }
             
             v4 Color = {255.0f*(0.5f*(Normal.x + 1.0f)),
-                        255.0f*(0.5f*(Normal.y + 1.0f)),
-                        127.0f*Normal.z,
-                        255.0f*Roughness};
+                255.0f*(0.5f*(Normal.y + 1.0f)),
+                255.0f*(0.5f*(Normal.z + 1.0f)),
+                255.0f*Roughness};
 
-            *Pixel = (((uint32)(Color.a + 0.5f) << 24) |
-                      ((uint32)(Color.r + 0.5f) << 16) | /* "or" the RBG together with truncation */
-                      ((uint32)(Color.g + 0.5f) << 8) |
-                      ((uint32)(Color.b + 0.5f) << 0));;
+            *Pixel++ = (((uint32)(Color.a + 0.5f) << 24) |
+                        ((uint32)(Color.r + 0.5f) << 16) | /* "or" the RBG together with truncation */
+                        ((uint32)(Color.g + 0.5f) << 8) |
+                        ((uint32)(Color.b + 0.5f) << 0));;
         }
 
         Row += Bitmap->Pitch;
@@ -768,7 +777,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             = DEBUGLoadBMP(Thread, Memory->DEBUGPlatformReadEntireFile, "test2/rock02.bmp");
         GameState->Sword
             = DEBUGLoadBMP(Thread, Memory->DEBUGPlatformReadEntireFile, "test2/rock03.bmp");
-
+        
         hero_bitmaps *Bitmap;
 
         Bitmap = GameState->HeroBitmaps;
@@ -1000,6 +1009,9 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             GroundBuffer->Bitmap = MakeEmptyBitmap(&TranState->TranArena, GroundBufferWidth, GroundBufferHeight, false);
             GroundBuffer->P = NullPosition();
         }
+
+        GameState->TreeNormal = MakeEmptyBitmap(&TranState->TranArena, GameState->Tree.Width, GameState->Tree.Height, false);
+        MakeSphereNormalMap(&GameState->TreeNormal, 0.0f);
 
         TranState->IsInitialized = true;
     }
@@ -1438,7 +1450,8 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     render_entry_coordinate_system *C = CoordinateSystem(RenderGroup, /*V2(Disp, 0) + */Origin - 0.5f*XAxis - 0.5f*YAxis, XAxis, YAxis,
                                                          Color,
                                                          &GameState->Tree,
-                                                         0, 0, 0, 0);
+                                                         &GameState->TreeNormal
+                                                         , 0, 0, 0);
 
     RenderGroupToOutput(RenderGroup, DrawBuffer);
 
