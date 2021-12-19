@@ -160,19 +160,30 @@ SRGBBilinearBlend(bilinear_sample Sample, real32 fX, real32 fY)
 }
 
 inline v3
-SampleEnvironmentMap(v2 ScreenSpaceUV, v3 Normal, real32 Roughness, environment_map *Map)
+SampleEnvironmentMap(v2 ScreenSpaceUV, v3 SampleDirection, real32 Roughness, environment_map *Map)
 {
     uint32 LODIndex =  (uint32)(Roughness*(real32)(ArrayCount(Map->LOD) - 1) + 0.5f);
     Assert(LODIndex < ArrayCount(Map->LOD));
 
     loaded_bitmap *LOD = &Map->LOD[LODIndex];
 
-    real32 tX = LOD->Width/2 + Normal.x*(real32)(LOD->Width/2);
-    real32 tY = LOD->Height/2 + Normal.y*(real32)(LOD->Height/2);
-    
+    Assert(SampleDirection.y > 0.0f);
+    real32 DistanceFromMapInZ = 1.0f;
+    real32 UVsPerMeter = 0.01f;
+    real32 C = (UVsPerMeter * DistanceFromMapInZ) / SampleDirection.y;
+    // TODO: Make sure we know what direction Z should go in Y
+    v2 Offset = C * V2(SampleDirection.x, SampleDirection.z);
+    v2 UV = ScreenSpaceUV + Offset;
+
+    UV.x = Clamp01(UV.x);
+    UV.y = Clamp01(UV.y);
+            
+    real32 tX = ((UV.x * (real32)(LOD->Width - 2)));
+    real32 tY = ((UV.y * (real32)(LOD->Height - 2)));
+
     int32 X = (int32)tX;
     int32 Y = (int32)tY;
-
+    
     real32 fX = tX - (real32)X;
     real32 fY = tY - (real32)Y;
 
@@ -310,14 +321,23 @@ DrawRectangleSlowly(loaded_bitmap *Buffer, v2 Origin, v2 XAxis, v2 YAxis, v4 Col
                     // TODO: Do we realy need to do this?
                     Normal.xyz = Normalize(Normal.xyz);
 
+                    // NOTE: THe eye vector is always assumed to be (0, 0, 1)
+                    // NOTE: This is just the simplified version of the reflection vector s = -e + 2*eTN * N
+                    v3 BounceDirection = 2.0f*Normal.z * Normal.xyz;
+                    BounceDirection.z -= 1.0f;
+                    
+                    v3 EyeVector = {0, 0, 1};
+
                     environment_map *FarMap = 0;
-                    real32 tEnvMap = Normal.y;
+                    real32 tEnvMap = BounceDirection.y;
                     real32 tFarMap = 0.0f;
 
                     if(tEnvMap < -0.5f)
                     {
                         FarMap = Bottom;
                         tFarMap = -1.0f - 2.0f*tEnvMap;
+                        BounceDirection.y = -BounceDirection.y;
+                                            
                     }
                     else if (tEnvMap > 0.5f)
                     {
@@ -325,10 +345,10 @@ DrawRectangleSlowly(loaded_bitmap *Buffer, v2 Origin, v2 XAxis, v2 YAxis, v4 Col
                         tFarMap = 2.0f*(tEnvMap - 0.5f);
                     }
 
-                    v3 LightColor = {0, 0, 0}; //SampleEnvironmentMap(ScreenSpaceUV, Normal.xyz, Normal.w, Middle);
+                    v3 LightColor = {0, 0, 0}; // TODO: How do we sample from the middle map???
                     if(FarMap)
                     {
-                        v3 FarMapColor = SampleEnvironmentMap(ScreenSpaceUV, Normal.xyz, Normal.w, FarMap);
+                        v3 FarMapColor = SampleEnvironmentMap(ScreenSpaceUV, BounceDirection, Normal.w, FarMap);
                         LightColor = Lerp(LightColor, tFarMap, FarMapColor);
                     }
                     

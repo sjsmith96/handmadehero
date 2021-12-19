@@ -1,0 +1,64 @@
+Reflection vectors:
+
+For reflective surfaces the light bounces off the surface the way you'd expect a ball to bounce off the surface
+
+The thetas in fig. 1 are equivalent.
+
+Like with collision detection we want to take a surface which has a normal, then we want to take a vector
+like the vector that goes out to the eye in fig 2, and we want to find a vector that is very similar to that
+vector only it goes in the opposite direction.
+
+In fig 2 we want to compute s from e
+
+in fig 3 if we negate e we have a vector that is going in the same direction as s, except instead of
+reflecting out of the plane it penetrates into the plane.
+
+So all we have to do to derive s is to find out what vector L is and add 2 of it to -e.
+See fig 3.
+
+We do this by finding the dot product of e with the normal
+
+so s = (2 * L) + (-e)
+
+We already know the Normal inside our DrawRectangleSlowly function.
+
+How do we find the eye vector (e)?
+
+We're going to pretend that the vector to the eye is pointing straight out at the screen. (orthographic?)
+
+The art is not perspective. You don't see more of different sides of the trees as you move around them.
+
+So our eye vector is just the z vector. See fig 6.
+
+Sinze the eye vector is always 0, 0, 1 when computing eTN for solving the s equation above we can ignore the x and y components.
+
+eTN = (e.x * N.x) + (e.y * N.y) + (e.z * N.z)
+eTN = 0 + 0 + e.z * N.z
+eTN = e.z * N.z
+
+Furthermore, we know that e.z is always 1.
+so etN is always just N.z
+
+eTn = 1 * N.z
+eTn = N.z
+
+So our s equation now looks thusly:
+
+s = (2 * N.z * N.xyz) - e
+
+We know that e is alway V3(0, 0, -1)
+
+so further simplifying gives us this:
+
+s = 2 * N.z * N.xyz - V3(0, 0, -1)
+
+Since all of this math is only dependent on the value of N.z we could potentially just store the value of s in the normal map.
+
+
+"Fudge factor"
+
+How do we sample from the environment map given a direction vector?
+We need to find where on the environment map that vector will hit.
+If we assume we know the z distance between the envirnoment map plane and the screen plane.
+
+Then all we need to know is how far we will be displaced in the normal x, y plane between the screen and the environment map
