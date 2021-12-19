@@ -1,0 +1,8 @@
+We want to be able to rotate normals based on the X/Y axis.
+
+See fig. 1
+We have a normal map with normals coming out of it
+If the axes end up being rotated we still have the normals pointing straight out of it
+
+In fig 1 if we rotate 45 degrees, the normal in red should also be rotated 45 degrees.
+The normal drawn in green is what the normal _should_ be. Right now we're not rotating it.
