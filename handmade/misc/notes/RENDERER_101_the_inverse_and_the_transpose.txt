@@ -6,3 +6,23 @@ If the axes end up being rotated we still have the normals pointing straight out
 
 In fig 1 if we rotate 45 degrees, the normal in red should also be rotated 45 degrees.
 The normal drawn in green is what the normal _should_ be. Right now we're not rotating it.
+
+In fig 2 if we scale the y axis the shape is going to elongate as shown in green.
+
+If you scale the normal the same way you'd get the normal drawn in red. But this is incorrect.
+If you look at the surface it implies a normal that would do the opposite thing.
+Instead of pointing more up it should be pointing more down.
+
+If we want to support non-uniform scaling we cannot scale the normals the same way we scale the regular textures.
+
+You need to push the normals through a different transform.
+
+the transpose turns vectors/matrices on their side
+
+Fig 3 is the fundamental transform for rotation and scaling in 2d.
+It's essentially the x and y axis multiply we were doing before packed into a matrix.
+
+If we waned to combine transform A with some different transform B we could multiply them together to get C
+which would be those two transforms combined together.
+
+There is also the inverse that does the opposite of the transformation.
