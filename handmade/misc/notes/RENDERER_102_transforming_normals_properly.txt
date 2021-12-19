@@ -1,0 +1,52 @@
+Suppose that we were to draw a spirte house (fig 1.)
+That's our house bitmap.
+How would we find Normal N?
+
+If we have points P0 and P1 we can find the vector between them (v)
+
+The normal is the vector that is perpindicular to vector v
+
+If we rotated the bitmap as in fig 2. The points P0 and P1 would rotate by the standard rotation
+
+POx*xAxis + P0y*Yaxis = P0'
+P1x*xAxis + P1y*Yaxis = P1'
+
+Similarly for rotating the normal
+
+Nx*Xaxis + Ny*Yaxis = N'
+
+If we were to scale the bitmap by 2x that would also work out fine with scaling the normal because
+the direction is uniform. We just have to make sure we change the normal back to length 1 after.
+
+Suppose we scaled the axes non uniformly. In fig. 3 we scale the x axis 2x.
+
+If we naively scaled the normal as we did before the normal would be pointing lower than it was before.
+But just looking at the image we can see that that's incorrect. The normal ought to be pointing higher
+than it was before.
+
+Because the construction of a perpindicular looks like this:
+
+Perp(v) = {-v.y, v.x};
+
+If we scale only the x up, the y component of the perp will be affected. (Because the x component of the original vector is the y component of the normal.)
+
+The actual transformation we want to preform to our normal is:
+
+Nx * (Xaxis / Length(Xaxis)) * Length(Yaxis) + Ny * (Yaxis / Length(Yaxis)) * Length(Xaxis)  
+
+or
+
+Nx * (Length(Yaxis) / Length(Xaxis) * X + Ny (Length(Xaxis) / Length (Yaxis)) * Y
+
+So these: (|y|/|x|) and (|x|/|y|) are coefficients we need to multiply into the standard transform we talked about above
+
+Notice how if the axes are scaled uniformly, these coefficients are simply 1 and therefore the transform is the same as the standard transform.
+
+See fig 4 for an explanation for why we need a NzScale factor.
+When we scale the normal with the tranform above we're only affecting its x and y components
+
+When we normalize that normal vector again (without changing the z) it's going to wrong because it's going
+to be completely dominated by its X and Y.
+
+To compensate we are multiplying the z component of the unscaled normal by the average length of the x and y axes
+before normalizing.

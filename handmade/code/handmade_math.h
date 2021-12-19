@@ -70,6 +70,25 @@ union v4
         real32
         a;
     };
+    struct
+    {
+        v2 xy;
+        real32 Ignored0;
+        real32 Ignored1;
+    };
+    struct
+    {
+        real32 Ignored2;
+        v2 yz;
+        real32 Ignored3;
+    };
+    struct
+    {
+        real32 Ignored4;
+        real32 Ignored5;
+        v2 zw;
+
+    };
     real32 E[4];
 };
 

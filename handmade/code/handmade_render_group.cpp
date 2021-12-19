@@ -160,24 +160,39 @@ SRGBBilinearBlend(bilinear_sample Sample, real32 fX, real32 fY)
 }
 
 inline v3
-SampleEnvironmentMap(v2 ScreenSpaceUV, v3 SampleDirection, real32 Roughness, environment_map *Map)
+SampleEnvironmentMap(v2 ScreenSpaceUV, v3 SampleDirection, real32 Roughness, environment_map *Map,
+                     real32 DistanceFromMapInZ)
 {
+
+    /* NOTE: ScreenScaceUV tells us where the ray is being cast _from_
+     in the normalized screen coordinates.
+
+     SampleDirection tells us what direction the cast is going and it does
+     not have to normalized.
+
+     Rougness says which Level of Detail of Map we sample from.
+    */
+
+    // NOTE: Pick which LOD to sample from
     uint32 LODIndex =  (uint32)(Roughness*(real32)(ArrayCount(Map->LOD) - 1) + 0.5f);
     Assert(LODIndex < ArrayCount(Map->LOD));
 
     loaded_bitmap *LOD = &Map->LOD[LODIndex];
 
-    Assert(SampleDirection.y > 0.0f);
-    real32 DistanceFromMapInZ = 1.0f;
+    // NOTE: Compute the distance to the map and the scaling factor
+    // for meters to UVs.
     real32 UVsPerMeter = 0.01f;
     real32 C = (UVsPerMeter * DistanceFromMapInZ) / SampleDirection.y;
-    // TODO: Make sure we know what direction Z should go in Y
     v2 Offset = C * V2(SampleDirection.x, SampleDirection.z);
+
+    // NOTE: Find the intersection point
     v2 UV = ScreenSpaceUV + Offset;
 
+    // NOTE: Clamp to the valid range
     UV.x = Clamp01(UV.x);
     UV.y = Clamp01(UV.y);
-            
+
+    // NOTE: Bilinear sample
     real32 tX = ((UV.x * (real32)(LOD->Width - 2)));
     real32 tY = ((UV.y * (real32)(LOD->Height - 2)));
 
@@ -189,6 +204,10 @@ SampleEnvironmentMap(v2 ScreenSpaceUV, v3 SampleDirection, real32 Roughness, env
 
     Assert((X >= 0) && (X < LOD->Width));
     Assert((Y >= 0) && (Y < LOD->Height));
+
+    uint8 *TexelPtr = ((uint8 *)LOD->Memory + Y*LOD->Pitch + X*sizeof(uint32));
+    *(uint32 *)TexelPtr = 0xFFFFFFFF;
+        
 
     bilinear_sample Sample = BilinearSample(LOD, X, Y);
     
@@ -207,9 +226,21 @@ DrawRectangleSlowly(loaded_bitmap *Buffer, v2 Origin, v2 XAxis, v2 YAxis, v4 Col
 {
     // NOTE: Premultiply Color up front
     Color.rgb *= Color.a;
-        
+
+    real32 XAxisLength = Length(XAxis);
+    real32 YAxisLength = Length(YAxis);
+    v2 NXaxis = (YAxisLength / XAxisLength) * XAxis;
+    v2 NYaxis = (XAxisLength / YAxisLength) * YAxis;
+
+    // NOTE: NzScale could be a parameter if people want to have
+    // control over the amount of scaling in the z direction that the
+    // normals appear to have.
+    real32 NzScale = 0.5f* (XAxisLength + YAxisLength);
+
+    
     real32 InvXAxisLengthSq = 1 /LengthSq(XAxis);
     real32 InvYAxisLengthSq = 1 /LengthSq(YAxis);
+
            
     uint32 Color32 = ((RoundReal32ToUInt32(Color.a * 255.0f) << 24) |
                       (RoundReal32ToUInt32(Color.r * 255.0f) << 16) |
@@ -318,6 +349,9 @@ DrawRectangleSlowly(loaded_bitmap *Buffer, v2 Origin, v2 XAxis, v2 YAxis, v4 Col
 
                     Normal = UnscaleAndBiasNormal(Normal);
 
+                    // TODO: rotate normals
+                    Normal.xy = Normal.x * NXaxis + Normal.y * NYaxis;
+                    Normal.z *= NzScale;
                     // TODO: Do we realy need to do this?
                     Normal.xyz = Normalize(Normal.xyz);
 
@@ -325,34 +359,49 @@ DrawRectangleSlowly(loaded_bitmap *Buffer, v2 Origin, v2 XAxis, v2 YAxis, v4 Col
                     // NOTE: This is just the simplified version of the reflection vector s = -e + 2*eTN * N
                     v3 BounceDirection = 2.0f*Normal.z * Normal.xyz;
                     BounceDirection.z -= 1.0f;
+
+                    // TODO: Eventually we need to support two mappings,
+                    // One for top-down view and one for sideways.
+                    
+                    BounceDirection.z = -BounceDirection.z;
                     
                     v3 EyeVector = {0, 0, 1};
 
+#if 1
                     environment_map *FarMap = 0;
+                    real32 DistanceFromMapInZ = 1.0f;
                     real32 tEnvMap = BounceDirection.y;
                     real32 tFarMap = 0.0f;
 
                     if(tEnvMap < -0.5f)
                     {
+                        // TODO: This path seems particularly broken
                         FarMap = Bottom;
                         tFarMap = -1.0f - 2.0f*tEnvMap;
-                        BounceDirection.y = -BounceDirection.y;
+                        DistanceFromMapInZ = -DistanceFromMapInZ;
                                             
                     }
                     else if (tEnvMap > 0.5f)
                     {
+#if 1
                         FarMap = Top;
                         tFarMap = 2.0f*(tEnvMap - 0.5f);
+#endif
                     }
 
                     v3 LightColor = {0, 0, 0}; // TODO: How do we sample from the middle map???
                     if(FarMap)
                     {
-                        v3 FarMapColor = SampleEnvironmentMap(ScreenSpaceUV, BounceDirection, Normal.w, FarMap);
+                        v3 FarMapColor = SampleEnvironmentMap(ScreenSpaceUV, BounceDirection, Normal.w, FarMap,
+                                                              DistanceFromMapInZ);
                         LightColor = Lerp(LightColor, tFarMap, FarMapColor);
                     }
-                    
                     Texel.rgb = Texel.rgb + Texel.a*LightColor;
+#else
+                    Texel.rgb = V3(0.5f, 0.5f, 0.5f) + 0.5f * BounceDirection;
+#endif
+                    
+
 
                 }
 
@@ -366,9 +415,9 @@ DrawRectangleSlowly(loaded_bitmap *Buffer, v2 Origin, v2 XAxis, v2 YAxis, v4 Col
 
 
                 v4 Dest = {(real32)((*Pixel >> 16) & 0xFF),
-                           (real32)((*Pixel >> 8) & 0xFF),
-                           (real32)((*Pixel >> 0) & 0xFF),
-                           (real32)((*Pixel >> 24) & 0xFF)};
+                    (real32)((*Pixel >> 8) & 0xFF),
+                    (real32)((*Pixel >> 0) & 0xFF),
+                    (real32)((*Pixel >> 24) & 0xFF)};
                 
                 // NOTE: From sRGB to light "linear" space
                 Dest = SRGB255ToLinear1(Dest);
@@ -379,9 +428,9 @@ DrawRectangleSlowly(loaded_bitmap *Buffer, v2 Origin, v2 XAxis, v2 YAxis, v4 Col
                 v4 Blended255 = Linear1ToSRGB255(Blended);
 
                 *Pixel = (((uint32)(Blended255.a + 0.5f) << 24) |
-                         ((uint32)(Blended255.r + 0.5f) << 16) | /* "or" the RBG together with truncation */
-                         ((uint32)(Blended255.g + 0.5f) << 8) |
-                         ((uint32)(Blended255.b + 0.5f) << 0));
+                          ((uint32)(Blended255.r + 0.5f) << 16) | /* "or" the RBG together with truncation */
+                          ((uint32)(Blended255.g + 0.5f) << 8) |
+                          ((uint32)(Blended255.b + 0.5f) << 0));
 
                             
 
@@ -445,9 +494,9 @@ DrawBitmap(loaded_bitmap *Buffer, loaded_bitmap *Bitmap,
 
 
             v4 Texel = {(real32)((*Source >> 16) & 0xFF),
-                        (real32)((*Source >> 8) & 0xFF),
-                        (real32)((*Source >> 0) & 0xFF),
-                        (real32)((*Source >> 24) & 0xFF)};
+                (real32)((*Source >> 8) & 0xFF),
+                (real32)((*Source >> 0) & 0xFF),
+                (real32)((*Source >> 24) & 0xFF)};
 
             Texel = SRGB255ToLinear1(Texel);
             Texel *= cAlpha;
